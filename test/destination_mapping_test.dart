@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:db_navigator/src/destination.dart';
-import 'package:db_navigator/src/json_pojo_converter.dart';
+import 'package:db_navigator/src/destination_argument_converter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -123,7 +123,8 @@ void main() {
       test(
         'encode destination custom metadata argument and decode it',
         () {
-          JsonPojoConverter().addHelper('_Feature', _Feature.fromJson);
+          DestinationArgumentConverter()
+              .addHelper('_Feature', _Feature.fromJson);
 
           const Destination destination = Destination(
             path: '/',
@@ -163,7 +164,7 @@ const _Feature _testFeature = _Feature(
 );
 
 @immutable
-class _Feature implements JsonToPojo<Map<String, Object?>> {
+class _Feature implements HasToJson<Map<String, Object?>> {
   const _Feature({
     required this.name,
     required this.progress,

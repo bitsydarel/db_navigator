@@ -1,29 +1,10 @@
-import 'dart:async' show Completer;
-
 import 'package:db_navigator/src/db_page.dart';
 import 'package:db_navigator/src/db_page_builder.dart';
-import 'package:db_navigator/src/db_router_delegate.dart';
 import 'package:db_navigator/src/destination.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-final DBPageBuilder pageBuilder = TestPageBuilder();
-final DBPage initialPage = TestPageBuilder.initialPage;
 const String unknownPath = '/unknown';
-
-DBRouterDelegate createDelegate({
-  Map<String, Completer<Object?>>? popResultTracker,
-  GlobalKey<NavigatorState>? navigatorKey,
-  bool reportsPageUpdateToEngine = false,
-}) {
-  return DBRouterDelegate(
-    pageBuilders: <DBPageBuilder>[pageBuilder],
-    initialPage: initialPage,
-    popResultTracker: popResultTracker,
-    navigatorKey: navigatorKey,
-    reportPageUpdateToEngine: reportsPageUpdateToEngine,
-  );
-}
 
 /// A [DBPageBuilder] that does not support building a [DBPage].
 ///
@@ -43,6 +24,8 @@ class RejectingPageBuilder extends DBPageBuilder {
 }
 
 class TestPageBuilder implements DBPageBuilder {
+  const TestPageBuilder();
+
   static final DBPage initialPage = DBPage(
     key: const ValueKey<String>(Page1.path),
     destination: const Destination(path: Page1.path),
@@ -84,47 +67,28 @@ class Page2 extends StatelessWidget {
   Widget build(BuildContext context) => Container();
 }
 
-class Route1 extends Route<dynamic> {
-  @override
-  bool didPop(dynamic result) {
-    super.didPop(result);
-    return false;
-  }
-}
+/// Widget page builder.
+///
+/// A [DBPageBuilder] that create a page with the [child] field
+/// for any destination requested.
+class WidgetPageBuilder extends DBPageBuilder {
+  static const ValueKey<String> key = ValueKey<String>('widget-page');
 
-class Route2 extends Route<dynamic> {
-  @override
-  RouteSettings get settings => const RouteSettings(name: Page2.path);
+  final Widget child;
 
-  @override
-  bool didPop(dynamic result) {
-    super.didPop(result);
-    return true;
-  }
-}
-
-class SearchObjectPageBuilder extends DBPageBuilder {
-  static const String key = 'pageToLookForObject';
-
-  final Widget widgetToLookForObject;
-
-  SearchObjectPageBuilder({required this.widgetToLookForObject});
+  const WidgetPageBuilder({required this.child});
 
   @override
   Future<DBPage> buildPage(Destination destination) {
-    return SynchronousFuture<DBPage>(_createPage(destination));
+    return SynchronousFuture<DBPage>(
+      DBPage(
+        key: key,
+        destination: destination,
+        child: child,
+      ),
+    );
   }
 
   @override
   bool supportRoute(Destination destination) => true;
-
-  DBPage _createPage([Destination? destination]) {
-    const ValueKey<String> valueKey = ValueKey<String>(key);
-
-    return DBPage(
-      key: valueKey,
-      destination: destination ?? const Destination(path: '/'),
-      child: widgetToLookForObject,
-    );
-  }
 }

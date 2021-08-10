@@ -12,6 +12,7 @@ class DBPage extends MaterialPage<Object?> {
     required LocalKey key,
     required this.destination,
     required Widget child,
+    String? restorationId,
   }) : super(
           key: key,
           name: destination.path,
@@ -19,5 +20,6 @@ class DBPage extends MaterialPage<Object?> {
           child: child,
           maintainState: true,
           fullscreenDialog: false,
+          restorationId: restorationId,
         );
 }

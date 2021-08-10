@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:db_navigator/src/json_pojo_converter.dart';
+import 'package:db_navigator/src/destination_argument_converter.dart';
 
 part 'destination.g.dart';
 
@@ -85,8 +85,8 @@ class DestinationMetadata {
   @JsonKey(
     includeIfNull: false,
     disallowNullValue: true,
-    fromJson: JsonPojoConverter.pojoFromJson,
-    toJson: JsonPojoConverter.pojoToJson,
+    fromJson: DestinationArgumentConverter.pojoFromJson,
+    toJson: DestinationArgumentConverter.pojoToJson,
   )
   final Object? arguments;
 

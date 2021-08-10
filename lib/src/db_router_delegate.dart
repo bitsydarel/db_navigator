@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:db_navigator/db_navigator.dart';
+import 'package:db_navigator/src/db_navigation_observer.dart';
 import 'package:db_navigator/src/db_page.dart';
 import 'package:db_navigator/src/db_page_builder.dart';
 import 'package:db_navigator/src/destination.dart';
 import 'package:db_navigator/src/exceptions.dart';
+import 'package:db_navigator/src/scoped_page_builder.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -20,8 +22,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     implements
         DBNavigator {
   final GlobalKey<NavigatorState> _navigatorKey;
-  final List<DBPageBuilder> _pageBuilders;
   final List<DBPage> _pages;
+  final List<DBPageBuilder> _pageBuilders;
   final Map<String, Completer<Object?>> _popResultTracker;
 
   /// Report page update to the flutter engine when the top most page changes.
@@ -87,8 +89,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   /// [popResultTracker] A [Map] that track pop result of page pushed
   /// into the stack.
   DBRouterDelegate({
-    required List<DBPageBuilder> pageBuilders,
     required DBPage initialPage,
+    required List<DBPageBuilder> pageBuilders,
     GlobalKey<NavigatorState>? navigatorKey,
     @visibleForTesting Map<String, Completer<Object?>>? popResultTracker,
     this.reportPageUpdateToEngine = false,
@@ -101,7 +103,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
           ),
           'no page builder in [pageBuilders] list can build initialPage',
         ),
-        _pageBuilders = pageBuilders,
+        _pageBuilders = List<DBPageBuilder>.of(pageBuilders),
         _pages = <DBPage>[initialPage],
         _navigatorKey = navigatorKey ?? GlobalKey<NavigatorState>(),
         _popResultTracker = popResultTracker ?? <String, Completer<Object?>>{};
@@ -176,11 +178,18 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
   @override
   Widget build(BuildContext context) {
+    final List<ScopedPageBuilder> scopedPageBuilder =
+        pageBuilders.whereType<ScopedPageBuilder>().toList();
+
     return Navigator(
       key: _navigatorKey,
       onPopPage: onPopPage,
       pages: pages,
       reportsRouteUpdateToEngine: reportPageUpdateToEngine,
+      observers: <NavigatorObserver>[
+        if (scopedPageBuilder.isNotEmpty)
+          DBNavigationObserver(pageBuilders: scopedPageBuilder),
+      ],
     );
   }
 
@@ -211,6 +220,10 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     _pages
       ..clear()
       ..add(initialPage);
+
+    for (final Completer<Object?> tracker in _popResultTracker.values) {
+      tracker.complete();
+    }
 
     notifyListeners();
   }
@@ -258,7 +271,9 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
     final Completer<Object?>? tracker = _popResultTracker.remove(topPage.name);
 
-    tracker?.complete(result);
+    if (tracker != null && !tracker.isCompleted) {
+      tracker.complete(result);
+    }
 
     notifyListeners();
   }
@@ -268,7 +283,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   /// [route] request to be be pop/removed.
   /// [result] provided with the request to pop the [route].
   @visibleForTesting
-  bool onPopPage(Route<dynamic> route, dynamic result) {
+  bool onPopPage(Route<Object?> route, [Object? result]) {
     final bool popSucceeded = route.didPop(result);
     // In the imperative pop, the route can decline to be pop so we
     // need to only update the page if the route has agreed to be pop.

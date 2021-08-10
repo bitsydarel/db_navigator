@@ -6,6 +6,7 @@ import 'package:db_navigator/src/destination.dart';
 import 'package:db_navigator/src/exceptions.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:mocktail/mocktail.dart';
 import 'utils.dart';
 
 void main() {
@@ -13,25 +14,34 @@ void main() {
     'instantiation',
     () {
       test(
-        'should have initial page inside pages list after instantiating',
+        'should have initial page inside pages list',
         () async {
-          final DBRouterDelegate delegate = createDelegate();
+          final DBPage initialPage = TestPageBuilder.initialPage;
 
-          final DBPage result = delegate.pages.first;
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: initialPage,
+          );
 
-          expect(initialPage, equals(result));
+          expect(routerDelegate.pages, hasLength(1));
+          expect(routerDelegate.pages, contains(initialPage));
         },
       );
 
       test(
-        'should have page builder instance inside '
-        'pageBuilders list after instantiating',
+        'should have page builder inside pageBuilders list',
         () {
-          final DBRouterDelegate delegate = createDelegate();
+          const TestPageBuilder pageBuilder = TestPageBuilder();
 
-          final DBPageBuilder result = delegate.pageBuilders.first;
+          final List<DBPageBuilder> pageBuilders = <DBPageBuilder>[pageBuilder];
 
-          expect(pageBuilder, equals(result));
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: pageBuilders,
+            initialPage: TestPageBuilder.initialPage,
+          );
+
+          expect(routerDelegate.pageBuilders, hasLength(1));
+          expect(routerDelegate.pageBuilders, contains(pageBuilder));
         },
       );
 
@@ -41,8 +51,8 @@ void main() {
         () {
           expect(
             () => DBRouterDelegate(
-              pageBuilders: <DBPageBuilder>[const RejectingPageBuilder()],
-              initialPage: initialPage,
+              pageBuilders: <DBPageBuilder>[],
+              initialPage: TestPageBuilder.initialPage,
             ),
             throwsAssertionError,
           );
@@ -50,13 +60,13 @@ void main() {
       );
 
       test(
-        "should throw assertion error if passed a pageBuilder list that can't "
-        'build the initial page',
+        'should throw an assertion error if passed pageBuilders '
+        "that can't build the initial page",
         () {
           expect(
             () => DBRouterDelegate(
               pageBuilders: <DBPageBuilder>[const RejectingPageBuilder()],
-              initialPage: initialPage,
+              initialPage: TestPageBuilder.initialPage,
             ),
             throwsAssertionError,
           );
@@ -70,10 +80,13 @@ void main() {
           final GlobalKey<NavigatorState> navigatorKey =
               GlobalKey<NavigatorState>();
 
-          final DBRouterDelegate delegate =
-              createDelegate(navigatorKey: navigatorKey);
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: TestPageBuilder.initialPage,
+            navigatorKey: navigatorKey,
+          );
 
-          expect(navigatorKey, equals(delegate.navigatorKey));
+          expect(routerDelegate.navigatorKey, equals(navigatorKey));
         },
       );
     },
@@ -82,59 +95,73 @@ void main() {
   group(
     'setNewRoutePath',
     () {
-      const Destination unknownConfig = Destination(path: unknownPath);
-      const Destination config = Destination(path: Page2.path);
+      const Destination unknownDestination = Destination(path: unknownPath);
 
       test(
-        'should remain the same page stack and same popResultTracker entries '
-        'if there is no pageBuilder found '
-        'for incoming configuration',
+        'should not update page stack and popResultTracker '
+        'if there is no pageBuilder that can build the new route',
         () async {
           final Map<String, Completer<Object>> popResultTracker =
               <String, Completer<Object>>{};
 
-          final DBRouterDelegate delegate =
-              createDelegate(popResultTracker: popResultTracker);
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: TestPageBuilder.initialPage,
+            popResultTracker: popResultTracker,
+          );
 
-          final int pageCountBeforeSetNewRoutePath = delegate.pages.length;
+          final int pageCount = routerDelegate.pages.length;
 
-          final int entriesCountBeforeSetNewRoutePath = popResultTracker.length;
+          final int resultTrackerCount = popResultTracker.length;
 
-          await delegate.setNewRoutePath(unknownConfig);
+          await routerDelegate.setNewRoutePath(unknownDestination);
 
-          expect(pageCountBeforeSetNewRoutePath, delegate.pages.length);
+          expect(routerDelegate.pages.length, equals(pageCount));
 
-          expect(entriesCountBeforeSetNewRoutePath, popResultTracker.length);
+          expect(popResultTracker.length, equals(resultTrackerCount));
         },
       );
 
       test(
-        'should add a new entry to popResultTracker map '
-        'if config is supported by one of pageBuilders',
+        'should add a new result trackers to popResultTracker map '
+        'if new route is supported by one of pageBuilders',
         () async {
-          const Destination config = Destination(path: Page2.path);
-
           final Map<String, Completer<Object>> popResultTracker =
               <String, Completer<Object>>{};
 
-          final DBRouterDelegate delegate =
-              createDelegate(popResultTracker: popResultTracker);
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: TestPageBuilder.initialPage,
+            popResultTracker: popResultTracker,
+          );
 
-          await delegate.setNewRoutePath(config);
+          expect(popResultTracker, isEmpty);
 
-          expect(popResultTracker.length, 1);
+          const Destination page2Destination = Destination(path: Page2.path);
+
+          await routerDelegate.setNewRoutePath(page2Destination);
+
+          expect(popResultTracker, hasLength(1));
+          expect(popResultTracker, contains(page2Destination.path));
         },
       );
 
       test(
         'should add a new page to the pages list '
-        'if config is supported ',
+        'if new route is supported by one of pageBuilders',
         () async {
-          final DBRouterDelegate delegate = createDelegate();
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: TestPageBuilder.initialPage,
+          );
 
-          await delegate.setNewRoutePath(config);
+          expect(routerDelegate.pages, hasLength(1));
 
-          expect(delegate.pages.length, 2);
+          const Destination page2Destination = Destination(path: Page2.path);
+
+          await routerDelegate.setNewRoutePath(page2Destination);
+
+          expect(routerDelegate.pages, hasLength(2));
         },
       );
     },
@@ -147,12 +174,18 @@ void main() {
         'should throw an assertion error '
         'if location parameter is empty',
         () {
-          final DBRouterDelegate delegate = createDelegate();
-
-          expect(() => delegate.navigateTo(location: ''), throwsAssertionError);
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: TestPageBuilder.initialPage,
+          );
 
           expect(
-            () => delegate.navigateTo(location: '    '),
+            () => routerDelegate.navigateTo(location: ''),
+            throwsAssertionError,
+          );
+
+          expect(
+            () => routerDelegate.navigateTo(location: '    '),
             throwsAssertionError,
           );
         },
@@ -160,12 +193,15 @@ void main() {
 
       test(
         'should throw PageNotFoundException '
-        'if no pageBuilders were found for location',
+        'if no pageBuilders were found a navigation location',
         () {
-          final DBRouterDelegate delegate = createDelegate();
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: TestPageBuilder.initialPage,
+          );
 
           expect(
-            () => delegate.navigateTo(location: unknownPath),
+            () => routerDelegate.navigateTo(location: unknownPath),
             throwsA(isInstanceOf<PageNotFoundException>()),
           );
         },
@@ -178,15 +214,33 @@ void main() {
     () {
       test(
         'should remove page from pages list',
-        () {
-          final DBRouterDelegate delegate = createDelegate()
-            ..navigateTo(location: Page2.path);
+        () async {
+          final Map<String, Completer<Object?>> trackers =
+              <String, Completer<Object?>>{};
 
-          final int pageLengthBeforeClosing = delegate.pages.length;
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: TestPageBuilder.initialPage,
+            popResultTracker: trackers,
+          );
 
-          delegate.close();
+          // since navigate to is async and return a future that wait until
+          // the page is closed, we need to add a timeout and force complete
+          // the future without removing the page.
+          await routerDelegate.navigateTo(location: Page2.path).timeout(
+            const Duration(milliseconds: 250),
+            onTimeout: () {
+              trackers.values.forEach((Completer<Object?> tracker) {
+                tracker.complete();
+              });
+            },
+          );
 
-          expect(delegate.pages.length, pageLengthBeforeClosing - 1);
+          expect(routerDelegate.pages, hasLength(2));
+
+          routerDelegate.close();
+
+          expect(routerDelegate.pages, hasLength(1));
         },
       );
     },
@@ -196,28 +250,54 @@ void main() {
     'onPopPage',
     () {
       test(
-        'should return false if designated route didPop method '
-        'returns false',
+        'should not matching page remove page if route didPop return false',
         () {
-          final DBRouterDelegate delegate = createDelegate();
+          final DBPage initialPage = TestPageBuilder.initialPage;
 
-          final Route<dynamic> route = Route1();
+          const TestPageBuilder pageBuilder = TestPageBuilder();
 
-          final bool result = delegate.onPopPage(route, null);
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[pageBuilder],
+            initialPage: initialPage,
+          );
+
+          final _MockRoute route = _MockRoute();
+
+          final List<DBPage> pages = routerDelegate.pages;
+
+          expect(pages, hasLength(1));
+
+          when(() => route.didPop(any())).thenReturn(false);
+
+          final bool result = routerDelegate.onPopPage(route);
+
+          expect(pages, hasLength(1));
 
           expect(result, false);
         },
       );
 
       test(
-        'should return true if designated route didPop method '
-        'returns true',
+        'should remove matching page if didPop return true',
         () {
-          final DBRouterDelegate delegate = createDelegate();
+          final DBPage initialPage = TestPageBuilder.initialPage;
 
-          final Route<dynamic> route = Route2();
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: initialPage,
+          );
 
-          final bool result = delegate.onPopPage(route, null);
+          final _MockRoute route = _MockRoute();
+
+          final List<DBPage> pages = routerDelegate.pages;
+
+          expect(pages, hasLength(1));
+
+          when(() => route.didPop(any())).thenReturn(true);
+
+          when(() => route.settings).thenReturn(initialPage);
+
+          final bool result = routerDelegate.onPopPage(route);
 
           expect(result, true);
         },
@@ -232,19 +312,62 @@ void main() {
         'should return null '
         'if reportPageUpdateToEngine is false',
         () {
-          final DBRouterDelegate delegate = createDelegate();
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: TestPageBuilder.initialPage,
+            reportPageUpdateToEngine:
+                false, // ignore: avoid_redundant_argument_values
+          );
 
-          expect(delegate.currentConfiguration, isNull);
+          expect(routerDelegate.currentConfiguration, isNull);
         },
       );
 
       test(
         'should return null if pages list is empty',
         () {
-          final DBRouterDelegate delegate =
-              createDelegate(reportsPageUpdateToEngine: true)..close();
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: TestPageBuilder.initialPage,
+            reportPageUpdateToEngine: true,
+          )..close();
 
-          expect(delegate.currentConfiguration, isNull);
+          expect(routerDelegate.currentConfiguration, isNull);
+        },
+      );
+
+      test(
+        'should return current visible page if reportPageUpdateToEngine '
+        'is true and pages list is not empty',
+        () async {
+          final Map<String, Completer<Object?>> trackers =
+              <String, Completer<Object?>>{};
+
+          final DBRouterDelegate routerDelegate = DBRouterDelegate(
+            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+            initialPage: TestPageBuilder.initialPage,
+            reportPageUpdateToEngine: true,
+            popResultTracker: trackers,
+          );
+
+          // since navigate to is async and return a future that wait until
+          // the page is closed, we need to add a timeout and force complete
+          // the future without removing the page.
+          await routerDelegate.navigateTo(location: Page2.path).timeout(
+            const Duration(milliseconds: 250),
+            onTimeout: () {
+              trackers.values.forEach((Completer<Object?> tracker) {
+                tracker.complete();
+              });
+            },
+          );
+
+          expect(routerDelegate.pages, hasLength(2));
+
+          final Destination? currentDestination =
+              routerDelegate.currentConfiguration;
+
+          expect(currentDestination?.path, equals(Page2.path));
         },
       );
     },
@@ -252,33 +375,60 @@ void main() {
 
   group('reset', () {
     test(
-        'should change the navigator page builders to different pageBuilder '
-        'and initial page', () async {
-      final DBRouterDelegate delegate = createDelegate();
-      final DBPageBuilder previousPageBuilder = delegate.pageBuilders.first;
-      final DBPage previousInitialPage = delegate.pages.first;
-      final DBPageBuilder newPageBuilder = TestPageBuilder();
+      'should change the navigator page builders to different pageBuilders '
+      'and initial page',
+      () async {
+        final Map<String, Completer<Object?>> trackers =
+            <String, Completer<Object?>>{};
 
-      await delegate.reset(Page2.path, <DBPageBuilder>[newPageBuilder]);
+        final DBRouterDelegate routerDelegate = DBRouterDelegate(
+          pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+          initialPage: TestPageBuilder.initialPage,
+          popResultTracker: trackers,
+        );
 
-      expect(delegate.pageBuilders.first, isNot(previousPageBuilder));
-      expect(delegate.pageBuilders.first, equals(newPageBuilder));
+        final List<DBPageBuilder> previousPageBuilders =
+            routerDelegate.pageBuilders;
 
-      expect(delegate.pages.first.name, equals(Page2.path));
-      expect(delegate.pages.first.name,
-          isNot(previousInitialPage.destination.path));
-    });
+        final List<DBPage> previousPages = routerDelegate.pages;
+
+        await routerDelegate.reset(
+          WidgetPageBuilder.key.value,
+          <DBPageBuilder>[const WidgetPageBuilder(child: Placeholder())],
+        );
+
+        expect(
+          routerDelegate.pageBuilders,
+          isNot(orderedEquals(previousPageBuilders)),
+        );
+
+        expect(routerDelegate.pages, isNot(orderedEquals(previousPages)));
+
+        expect(trackers, isEmpty);
+      },
+    );
 
     test('should reset pages list adding initial page', () async {
-      final DBRouterDelegate delegate = createDelegate();
-      final DBPageBuilder newPageBuilder = TestPageBuilder();
+      final DBRouterDelegate routerDelegate = DBRouterDelegate(
+        pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+        initialPage: TestPageBuilder.initialPage,
+      );
 
-      expect(delegate.pages.first.name, equals(Page1.path));
+      expect(routerDelegate.pages, contains(TestPageBuilder.initialPage));
 
-      await delegate.reset(Page2.path, <DBPageBuilder>[newPageBuilder]);
+      await routerDelegate.reset(
+        WidgetPageBuilder.key.value,
+        <DBPageBuilder>[const WidgetPageBuilder(child: Placeholder())],
+      );
 
-      expect(delegate.pages.length, equals(1));
-      expect(delegate.pages.first.name, equals(Page2.path));
+      expect(routerDelegate.pages, hasLength(1));
+
+      expect(
+        routerDelegate.pages.first.name,
+        equals(WidgetPageBuilder.key.value),
+      );
     });
   });
 }
+
+class _MockRoute extends Mock implements Route<Object?> {}

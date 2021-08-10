@@ -13,13 +13,14 @@ import 'utils.dart';
 void main() {
   testWidgets(
     'should return an instance '
-        'of DBRouterDelegate if there is one in context',
-        (WidgetTester tester) async {
-      const ValueKey<String> key =
-      ValueKey<String>('_DBRouterDelegateLookUpWidget');
+    'of DBRouterDelegate if there is one in context',
+    (WidgetTester tester) async {
+      const ValueKey<String> key = ValueKey<String>(
+        '_DBRouterDelegateLookUpWidget',
+      );
 
-      final SearchObjectPageBuilder pageBuilder = SearchObjectPageBuilder(
-        widgetToLookForObject: _DBRouterDelegateLookUpWidget(key),
+      final WidgetPageBuilder pageBuilder = WidgetPageBuilder(
+        child: _DBRouterDelegateLookUpWidget(key),
       );
 
       final DBPage initialPage = await pageBuilder.buildPage(
@@ -51,8 +52,8 @@ void main() {
 
   testWidgets(
     'should throw $DBRouterDelegateNotFoundException '
-        'if there is no DBRouteDelegate in context',
-        (WidgetTester tester) async {
+    'if there is no DBRouteDelegate in context',
+    (WidgetTester tester) async {
       const ValueKey<String> key = ValueKey<String>('throwableKey');
       final _TestRouterDelegate delegate = _TestRouterDelegate(key);
 
@@ -75,32 +76,23 @@ void main() {
   );
 }
 
-//===================SUPPLIES FOR TESTS======================
-
-//must_be_immutable ignored due to Testing
+//must_be_immutable ignored just for Testing
 // ignore: must_be_immutable
 class _DBRouterDelegateLookUpWidget extends StatelessWidget {
-  _DBRouterDelegateLookUpWidget(Key key) : super(key: key);
-
   late DBRouterDelegate delegate;
+
+  _DBRouterDelegateLookUpWidget(Key key) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     delegate = DBRouterDelegate.of(context);
     return const SizedBox(height: 100, width: 100);
   }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-        .add(DiagnosticsProperty<DBRouterDelegate>('delegate', delegate));
-  }
 }
 
 class _TestRouterDelegate extends RouterDelegate<Destination>
     with
-    // ignore: prefer_mixin
+        // ignore: prefer_mixin
         ChangeNotifier,
         PopNavigatorRouterDelegateMixin<Destination> {
   final ValueKey<String> key;
@@ -125,7 +117,7 @@ class _TestRouterDelegate extends RouterDelegate<Destination>
   GlobalKey<NavigatorState> get navigatorKey => GlobalKey<NavigatorState>();
 }
 
-//must_be_immutable ignored due to Testing
+//must_be_immutable ignored just for Testing
 // ignore: must_be_immutable
 class _ThrowableWidget extends StatelessWidget {
   _ThrowableWidget(Key key) : super(key: key);
