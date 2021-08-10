@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:db_navigator/db_navigator.dart';
+import 'package:db_navigator/src/db_navigation_observer.dart';
 import 'package:db_navigator/src/db_page.dart';
 import 'package:db_navigator/src/db_page_builder.dart';
 import 'package:db_navigator/src/destination.dart';
 import 'package:db_navigator/src/exceptions.dart';
+import 'package:db_navigator/src/scoped_page_builder.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -176,11 +178,18 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
   @override
   Widget build(BuildContext context) {
+    final List<ScopedPageBuilder> scopedPageBuilder =
+        pageBuilders.whereType<ScopedPageBuilder>().toList();
+
     return Navigator(
       key: _navigatorKey,
       onPopPage: onPopPage,
       pages: pages,
       reportsRouteUpdateToEngine: reportPageUpdateToEngine,
+      observers: <NavigatorObserver>[
+        if (scopedPageBuilder.isNotEmpty)
+          DBNavigationObserver(pageBuilders: scopedPageBuilder),
+      ],
     );
   }
 

@@ -6,7 +6,8 @@ export 'package:db_navigator/src/db_page.dart';
 export 'package:db_navigator/src/db_page_builder.dart';
 export 'package:db_navigator/src/db_route_information_parser.dart';
 export 'package:db_navigator/src/db_router_delegate.dart';
-export 'package:db_navigator/src/json_pojo_converter.dart';
+export 'package:db_navigator/src/destination_argument_converter.dart';
+export 'package:db_navigator/src/scoped_page_builder.dart';
 
 /// DB Navigator.
 ///

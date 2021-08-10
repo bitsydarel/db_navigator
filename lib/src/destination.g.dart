@@ -13,7 +13,7 @@ Destination _$DestinationFromJson(Map<String, dynamic> json) {
   return Destination(
     path: json['path'] as String,
     metadata:
-    DestinationMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
+        DestinationMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
   );
 }
 
@@ -26,7 +26,7 @@ Map<String, dynamic> _$DestinationToJson(Destination instance) =>
 DestinationMetadata _$DestinationMetadataFromJson(Map<String, dynamic> json) {
   $checkKeys(json, disallowNullValues: const ['arguments', 'history']);
   return DestinationMetadata(
-    arguments: JsonPojoConverter.pojoFromJson(json['arguments']),
+    arguments: DestinationArgumentConverter.pojoFromJson(json['arguments']),
     history: DestinationMetadata._fromJson(json['history']),
   );
 }
@@ -40,7 +40,8 @@ Map<String, dynamic> _$DestinationMetadataToJson(DestinationMetadata instance) {
     }
   }
 
-  writeNotNull('arguments', JsonPojoConverter.pojoToJson(instance.arguments));
+  writeNotNull(
+      'arguments', DestinationArgumentConverter.pojoToJson(instance.arguments));
   writeNotNull('history', DestinationMetadata._toJson(instance.history));
   return val;
 }

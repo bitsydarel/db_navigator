@@ -1,12 +1,16 @@
-import 'package:db_navigator/src/json_pojo_converter.dart';
+import 'package:db_navigator/src/destination_argument_converter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('JsonPojoConverter initializes once and then returns the same instance',
       () {
-    final JsonPojoConverter pojoConverter = JsonPojoConverter();
+    final DestinationArgumentConverter pojoConverter =
+        DestinationArgumentConverter();
 
-    expect(identical(JsonPojoConverter.instance, pojoConverter), isTrue);
+    expect(
+      identical(DestinationArgumentConverter.instance, pojoConverter),
+      isTrue,
+    );
   });
 
   group(
@@ -15,7 +19,8 @@ void main() {
       test(
         'should add entry to helpers map',
         () {
-          final JsonPojoConverter converter = JsonPojoConverter();
+          final DestinationArgumentConverter converter =
+              DestinationArgumentConverter();
 
           expect(converter.helpers.isEmpty, isTrue);
 
@@ -33,10 +38,11 @@ void main() {
       test(
         'should return a map of existent helpers',
         () {
-          final JsonPojoConverter converter = JsonPojoConverter()
-            ..addHelper('PersonHelper', _Person.fromJson);
+          final DestinationArgumentConverter converter =
+              DestinationArgumentConverter()
+                ..addHelper('PersonHelper', _Person.fromJson);
 
-          final Map<String, PojoFromJson> helpers =
+          final Map<String, DestinationArgumentFromJson> helpers =
               converter.getHelperRegistry();
 
           expect(helpers, equals(converter.helpers));
@@ -51,7 +57,8 @@ void main() {
       test(
         'should clear all helpers',
         () {
-          final JsonPojoConverter converter = JsonPojoConverter();
+          final DestinationArgumentConverter converter =
+              DestinationArgumentConverter();
 
           for (int i = 0; i < 5; i++) {
             converter.addHelper('helper #$i', _Person.fromJson);
@@ -73,7 +80,7 @@ void main() {
       test(
         'should convert json to pojo',
         () {
-          final JsonPojoConverter _ = JsonPojoConverter()
+          final DestinationArgumentConverter _ = DestinationArgumentConverter()
             ..addHelper('PersonHelper', _Person.fromJson);
 
           final _Person somePerson = _Person(fullName: 'Arden Rose', age: 28);
@@ -85,7 +92,8 @@ void main() {
             }
           };
 
-          final Object? personFromPojo = JsonPojoConverter.pojoFromJson(json);
+          final Object? personFromPojo =
+              DestinationArgumentConverter.pojoFromJson(json);
 
           expect(personFromPojo, isA<_Person>());
         },
@@ -101,7 +109,7 @@ void main() {
         () {
           final _Person person = _Person(fullName: 'Arden Rose', age: 28);
 
-          final Object? json = JsonPojoConverter.pojoToJson(person);
+          final Object? json = DestinationArgumentConverter.pojoToJson(person);
 
           expect(json, isA<Map<String, Object?>>());
 
@@ -125,12 +133,9 @@ void main() {
   );
 }
 
-///
-class _Person implements JsonToPojo<Map<String, Object?>> {
-  ///
+class _Person implements HasToJson<Map<String, Object?>> {
   final String fullName;
 
-  ///
   final int age;
 
   _Person({required this.fullName, required this.age});
