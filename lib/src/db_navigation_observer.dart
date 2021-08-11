@@ -17,7 +17,8 @@ class DBNavigationObserver extends NavigatorObserver {
     if (configuration is DBPage) {
       pageBuilders.where(
         (ScopedPageBuilder pageBuilder) {
-          return configuration.destination == pageBuilder.initialDestination;
+          return configuration.destination.path ==
+              pageBuilder.initialDestination.path;
         },
       ).forEach((ScopedPageBuilder pageBuilder) {
         pageBuilder.onInitialDestinationEntered();
@@ -32,7 +33,8 @@ class DBNavigationObserver extends NavigatorObserver {
     if (configuration is DBPage) {
       pageBuilders.where(
         (ScopedPageBuilder pageBuilder) {
-          return configuration.destination == pageBuilder.initialDestination;
+          return configuration.destination.path ==
+              pageBuilder.initialDestination.path;
         },
       ).forEach((ScopedPageBuilder pageBuilder) {
         pageBuilder.onInitialDestinationExited();

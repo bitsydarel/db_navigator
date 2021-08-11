@@ -9,3 +9,7 @@
 * Added ScopedPageBuilder which provide functionality to get notified when initial page has been exited.
 * Added widget tests that cover the new ScopedPageBuilder functionality.
 * Renamed the JsonPojoConverter to DestinationArgumentConverter to unify the api and make it more clear.
+
+## 0.0.3
+
+* Update DBNavigationObserver to check initial destination by path rather than destination equality.
