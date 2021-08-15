@@ -1,3 +1,4 @@
+import 'package:db_navigator/db_navigator.dart';
 import 'package:db_navigator/src/db_page.dart';
 import 'package:db_navigator/src/db_page_builder.dart';
 import 'package:db_navigator/src/destination.dart';
@@ -33,19 +34,47 @@ class TestPageBuilder implements DBPageBuilder {
   );
 
   @override
-  Future<DBPage> buildPage(Destination destination) {
-    return SynchronousFuture<DBPage>(
-      DBPage(
-        key: ValueKey<String>(destination.path),
-        destination: destination,
-        child: destination.path == Page1.path ? const Page1() : const Page2(),
-      ),
+  Future<DBPage> buildPage(Destination destination) async {
+    final Widget child;
+
+    switch (destination.path) {
+      case Page1.path:
+        child = const Page1();
+        break;
+      case Page2.path:
+        child = const Page2();
+        break;
+      case Page3.path:
+        child = const Page3();
+        break;
+      case Page4.path:
+        child = const Page4();
+        break;
+      default:
+        throw PageNotFoundException(destination);
+    }
+
+    return DBPage(
+      key: ValueKey<String>(destination.path),
+      destination: destination,
+      child: child,
     );
   }
 
   @override
   bool supportRoute(Destination destination) {
-    return destination.path == Page1.path || destination.path == Page2.path;
+    switch (destination.path) {
+      case Page1.path:
+        return true;
+      case Page2.path:
+        return true;
+      case Page3.path:
+        return true;
+      case Page4.path:
+        return true;
+      default:
+        return false;
+    }
   }
 }
 
@@ -62,6 +91,24 @@ class Page2 extends StatelessWidget {
   static const String path = '/page2';
 
   const Page2([Key? key]) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
+class Page3 extends StatelessWidget {
+  static const String path = '/page3';
+
+  const Page3({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Container();
+}
+
+class Page4 extends StatelessWidget {
+  static const String path = '/page4';
+
+  const Page4({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Container();

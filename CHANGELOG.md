@@ -13,3 +13,8 @@
 ## 0.0.3
 
 * Update DBNavigationObserver to check initial destination by path rather than destination equality.
+
+## 0.0.4
+
+* Disallow closing a screen which is the only one in the page stack.
+* Provide possibility to close all page until a specific page is displayed.

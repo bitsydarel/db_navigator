@@ -212,28 +212,59 @@ void main() {
   group(
     'close',
     () {
+      test('should throw assert error if pages list empty', () {
+        const TestPageBuilder pageBuilder = TestPageBuilder();
+
+        final Map<String, Completer<Object?>> trackers =
+            <String, Completer<Object?>>{};
+
+        final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+          <DBPage>[],
+          <DBPageBuilder>[pageBuilder],
+          GlobalKey<NavigatorState>(),
+          trackers,
+        );
+
+        expect(routerDelegate.pages, isEmpty);
+
+        expect(routerDelegate.close, throwsAssertionError);
+      });
+
+      test('should throw assert error if pages list only have one page', () {
+        const TestPageBuilder pageBuilder = TestPageBuilder();
+
+        final Map<String, Completer<Object?>> trackers =
+            <String, Completer<Object?>>{};
+
+        final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+          <DBPage>[TestPageBuilder.initialPage],
+          <DBPageBuilder>[pageBuilder],
+          GlobalKey<NavigatorState>(),
+          trackers,
+        );
+
+        expect(routerDelegate.pages, hasLength(equals(1)));
+
+        expect(routerDelegate.close, throwsAssertionError);
+      });
+
       test(
         'should remove page from pages list',
         () async {
+          const TestPageBuilder pageBuilder = TestPageBuilder();
+
+          final DBPage page2 = await pageBuilder.buildPage(
+            const Destination(path: Page2.path),
+          );
+
           final Map<String, Completer<Object?>> trackers =
               <String, Completer<Object?>>{};
 
-          final DBRouterDelegate routerDelegate = DBRouterDelegate(
-            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
-            initialPage: TestPageBuilder.initialPage,
-            popResultTracker: trackers,
-          );
-
-          // since navigate to is async and return a future that wait until
-          // the page is closed, we need to add a timeout and force complete
-          // the future without removing the page.
-          await routerDelegate.navigateTo(location: Page2.path).timeout(
-            const Duration(milliseconds: 250),
-            onTimeout: () {
-              trackers.values.forEach((Completer<Object?> tracker) {
-                tracker.complete();
-              });
-            },
+          final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+            <DBPage>[page2, TestPageBuilder.initialPage],
+            <DBPageBuilder>[pageBuilder],
+            GlobalKey<NavigatorState>(),
+            trackers,
           );
 
           expect(routerDelegate.pages, hasLength(2));
@@ -326,11 +357,13 @@ void main() {
       test(
         'should return null if pages list is empty',
         () {
-          final DBRouterDelegate routerDelegate = DBRouterDelegate(
-            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
-            initialPage: TestPageBuilder.initialPage,
+          final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+            <DBPage>[],
+            <DBPageBuilder>[const TestPageBuilder()],
+            GlobalKey<NavigatorState>(),
+            <String, Completer<Object?>>{},
             reportPageUpdateToEngine: true,
-          )..close();
+          );
 
           expect(routerDelegate.currentConfiguration, isNull);
         },
@@ -340,26 +373,20 @@ void main() {
         'should return current visible page if reportPageUpdateToEngine '
         'is true and pages list is not empty',
         () async {
+          const TestPageBuilder pageBuilder = TestPageBuilder();
+
+          final DBPage page2 =
+              await pageBuilder.buildPage(const Destination(path: Page2.path));
+
           final Map<String, Completer<Object?>> trackers =
               <String, Completer<Object?>>{};
 
-          final DBRouterDelegate routerDelegate = DBRouterDelegate(
-            pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
-            initialPage: TestPageBuilder.initialPage,
+          final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+            <DBPage>[TestPageBuilder.initialPage, page2],
+            <DBPageBuilder>[const TestPageBuilder()],
+            GlobalKey<NavigatorState>(),
+            trackers,
             reportPageUpdateToEngine: true,
-            popResultTracker: trackers,
-          );
-
-          // since navigate to is async and return a future that wait until
-          // the page is closed, we need to add a timeout and force complete
-          // the future without removing the page.
-          await routerDelegate.navigateTo(location: Page2.path).timeout(
-            const Duration(milliseconds: 250),
-            onTimeout: () {
-              trackers.values.forEach((Completer<Object?> tracker) {
-                tracker.complete();
-              });
-            },
           );
 
           expect(routerDelegate.pages, hasLength(2));
@@ -428,7 +455,162 @@ void main() {
         equals(WidgetPageBuilder.key.value),
       );
     });
+
+    test(
+      "should reset pages list to match the new initial page and it's history",
+      () async {
+        const DBPageBuilder initialPageBuilder =
+            WidgetPageBuilder(child: Placeholder());
+
+        final DBPage initialPage =
+            await initialPageBuilder.buildPage(const Destination(path: '/'));
+
+        final DBRouterDelegate routerDelegate = DBRouterDelegate(
+          initialPage: initialPage,
+          pageBuilders: <DBPageBuilder>[
+            const WidgetPageBuilder(child: Placeholder()),
+          ],
+        );
+
+        expect(routerDelegate.pages, contains(initialPage));
+
+        await routerDelegate.reset(
+          Page2.path,
+          <DBPageBuilder>[const TestPageBuilder()],
+          initialPageHistory: <Destination>[
+            const Destination(path: Page1.path)
+          ],
+        );
+
+        expect(routerDelegate.pages, hasLength(2));
+
+        final List<DBPage> currentPages = routerDelegate.pages;
+
+        expect(currentPages[1].destination.path, equals(Page2.path));
+        expect(currentPages[0].destination.path, equals(Page1.path));
+      },
+    );
   });
+
+  group(
+    'closeUntil',
+    () {
+      test('should throw assert error if pages list is empty', () {
+        final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+          <DBPage>[],
+          <DBPageBuilder>[const TestPageBuilder()],
+          GlobalKey<NavigatorState>(),
+          <String, Completer<Object?>>{},
+        );
+
+        expect(routerDelegate.pages, isEmpty);
+
+        expect(
+          () => routerDelegate.closeUntil(location: Page1.path),
+          throwsAssertionError,
+        );
+      });
+
+      test('show throw assert error if pages length is less than 2', () {
+        final DBRouterDelegate routerDelegate = DBRouterDelegate(
+          initialPage: TestPageBuilder.initialPage,
+          pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+        );
+
+        expect(routerDelegate.pages, hasLength(equals(1)));
+
+        expect(
+          () => routerDelegate.closeUntil(location: Page2.path),
+          throwsAssertionError,
+        );
+      });
+
+      test(
+        'show throw assert error if location is not in the pages list',
+        () async {
+          const TestPageBuilder pageBuilder = TestPageBuilder();
+
+          final DBPage page2 =
+              await pageBuilder.buildPage(const Destination(path: Page2.path));
+
+          final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+            <DBPage>[TestPageBuilder.initialPage, page2],
+            <DBPageBuilder>[pageBuilder],
+            GlobalKey<NavigatorState>(),
+            <String, Completer<Object?>>{},
+          );
+
+          expect(routerDelegate.pages, hasLength(2));
+
+          expect(
+            () => routerDelegate.closeUntil(location: Page3.path),
+            throwsAssertionError,
+          );
+        },
+      );
+
+      test(
+        'should throw assert error if closeUntil used to close a single page',
+        () async {
+          const TestPageBuilder pageBuilder = TestPageBuilder();
+
+          final DBPage page2 =
+              await pageBuilder.buildPage(const Destination(path: Page2.path));
+
+          final DBPage page3 =
+              await pageBuilder.buildPage(const Destination(path: Page3.path));
+
+          final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+            <DBPage>[TestPageBuilder.initialPage, page2, page3],
+            <DBPageBuilder>[pageBuilder],
+            GlobalKey<NavigatorState>(),
+            <String, Completer<Object?>>{},
+          );
+
+          expect(routerDelegate.pages, hasLength(equals(3)));
+
+          expect(
+            () => routerDelegate.closeUntil(location: page3.destination.path),
+            throwsAssertionError,
+          );
+        },
+      );
+
+      test(
+        'should remove pages until specified page is the current visible',
+        () async {
+          const TestPageBuilder pageBuilder = TestPageBuilder();
+
+          final DBPage page2 =
+              await pageBuilder.buildPage(const Destination(path: Page2.path));
+
+          final DBPage page3 =
+              await pageBuilder.buildPage(const Destination(path: Page3.path));
+
+          final DBPage page4 =
+              await pageBuilder.buildPage(const Destination(path: Page4.path));
+
+          final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+            <DBPage>[TestPageBuilder.initialPage, page2, page3, page4],
+            <DBPageBuilder>[pageBuilder],
+            GlobalKey<NavigatorState>(),
+            <String, Completer<Object?>>{},
+          );
+
+          expect(routerDelegate.pages, hasLength(equals(4)));
+
+          routerDelegate.closeUntil(location: Page2.path);
+
+          expect(routerDelegate.pages, hasLength(equals(2)));
+
+          expect(
+            routerDelegate.pages,
+            containsAllInOrder(<DBPage>[TestPageBuilder.initialPage, page2]),
+          );
+        },
+      );
+    },
+  );
 }
 
 class _MockRoute extends Mock implements Route<Object?> {}
