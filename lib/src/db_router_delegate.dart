@@ -88,25 +88,41 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   ///
   /// [popResultTracker] A [Map] that track pop result of page pushed
   /// into the stack.
-  DBRouterDelegate({
+  factory DBRouterDelegate({
     required DBPage initialPage,
     required List<DBPageBuilder> pageBuilders,
     GlobalKey<NavigatorState>? navigatorKey,
     @visibleForTesting Map<String, Completer<Object?>>? popResultTracker,
+    bool reportPageUpdateToEngine = false,
+  }) {
+    assert(pageBuilders.isNotEmpty, 'Page builder list is empty');
+    assert(
+      pageBuilders.any(
+        (DBPageBuilder builder) {
+          return builder.supportRoute(initialPage.destination);
+        },
+      ),
+      'no page builder in [pageBuilders] list can build initialPage',
+    );
+
+    return DBRouterDelegate.private(
+      <DBPage>[initialPage],
+      List<DBPageBuilder>.of(pageBuilders),
+      navigatorKey ?? GlobalKey<NavigatorState>(),
+      popResultTracker ?? <String, Completer<Object?>>{},
+      reportPageUpdateToEngine: reportPageUpdateToEngine,
+    );
+  }
+
+  /// Create a [DBRouterDelegate] from scratch.
+  @visibleForTesting
+  DBRouterDelegate.private(
+    this._pages,
+    this._pageBuilders,
+    this._navigatorKey,
+    this._popResultTracker, {
     this.reportPageUpdateToEngine = false,
-  })  : assert(pageBuilders.isNotEmpty, 'Page builder list is empty'),
-        assert(
-          pageBuilders.any(
-            (DBPageBuilder builder) {
-              return builder.supportRoute(initialPage.destination);
-            },
-          ),
-          'no page builder in [pageBuilders] list can build initialPage',
-        ),
-        _pageBuilders = List<DBPageBuilder>.of(pageBuilders),
-        _pages = <DBPage>[initialPage],
-        _navigatorKey = navigatorKey ?? GlobalKey<NavigatorState>(),
-        _popResultTracker = popResultTracker ?? <String, Completer<Object?>>{};
+  });
 
   @override
   Future<void> setInitialRoutePath(Destination configuration) async {
@@ -142,29 +158,29 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     // or we could return the user to a 404 page.
     if (newPage != null) {
       // map the current list of page to it's destination representation.
-      final Iterable<Destination> currentStack = _pages.map(
+      final Iterable<Destination> currentHistory = _pages.map(
         (DBPage page) => page.destination,
       );
 
       // If the new page has a history than we need to check that it's not
       // the same as the current one.
-      final List<Destination>? newPageStack = configuration.metadata.history;
+      final List<Destination>? newPageHistory = configuration.metadata.history;
 
-      final Iterable<Destination> newPageFullStack = <Destination>[
-        if (newPageStack != null) ...newPageStack,
-        configuration,
+      final Iterable<Destination> newPageFullHistory = <Destination>[
+        if (newPageHistory != null) ...newPageHistory,
+        configuration, // add the new destination requested.
       ];
 
       // If the stack are equals then there's no point on updating the pages
       // Because we might loose state of each screen and in a tabbed navigation
       // this might be called when switching tabs.
-      if (!areNavigationStackEquals(currentStack, newPageFullStack)) {
+      if (!areNavigationStackEquals(currentHistory, newPageFullHistory)) {
         // If the new stack is null or empty than we just add the new page.
-        if (newPageStack == null || newPageStack.isEmpty) {
+        if (newPageHistory == null || newPageHistory.isEmpty) {
           _pages.add(newPage);
         } else {
           final List<DBPage> newPages =
-              await _pageBuilders.createPages(newPageStack);
+              await _pageBuilders.createPages(newPageHistory);
 
           _pages
             ..addAll(newPages)
@@ -199,6 +215,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     final String initialPath,
     final List<DBPageBuilder> newPageBuilders, {
     Object? arguments,
+    List<Destination>? initialPageHistory,
   }) async {
     assert(newPageBuilders.isNotEmpty, "List of page builders can't be empty");
 
@@ -208,7 +225,10 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
     final Destination destination = Destination(
       path: initialPath,
-      metadata: DestinationMetadata(arguments: arguments),
+      metadata: DestinationMetadata(
+        arguments: arguments,
+        history: initialPageHistory,
+      ),
     );
 
     final DBPage? initialPage = await _pageBuilders.getPage(destination);
@@ -217,9 +237,20 @@ class DBRouterDelegate extends RouterDelegate<Destination>
       throw PageNotFoundException(destination);
     }
 
-    _pages
-      ..clear()
-      ..add(initialPage);
+    if (initialPageHistory != null && initialPageHistory.isNotEmpty) {
+      final List<DBPage> prevPages = await _pageBuilders.createPages(
+        initialPageHistory,
+      );
+
+      _pages
+        ..clear()
+        ..addAll(prevPages)
+        ..add(initialPage);
+    } else {
+      _pages
+        ..clear()
+        ..add(initialPage);
+    }
 
     for (final Completer<Object?> tracker in _popResultTracker.values) {
       tracker.complete();
@@ -267,15 +298,56 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   @override
   void close<T extends Object?>([final T? result]) {
     assert(_pages.isNotEmpty, "there's no page in the stack to close");
-    final DBPage topPage = _pages.removeLast();
+    assert(_pages.length > 1, "You can't remove the only page in the stack");
+    final DBPage topPage = _pages.removeAt(_pages.length - 1);
 
-    final Completer<Object?>? tracker = _popResultTracker.remove(topPage.name);
+    final Completer<Object?>? tracker = _popResultTracker.remove(
+      topPage.destination.path,
+    );
 
     if (tracker != null && !tracker.isCompleted) {
       tracker.complete(result);
     }
 
     notifyListeners();
+  }
+
+  @override
+  void closeUntil({required String location, Map<String, Object?>? resultMap}) {
+    assert(_pages.isNotEmpty, "there's no page in the stack to close");
+    assert(_pages.length > 1, "You can't remove the only page in the stack");
+
+    final int locationIndex = _pages.indexWhere((DBPage page) {
+      return page.destination.path == location;
+    });
+
+    assert(
+      locationIndex > 0,
+      '$location is the last page or not found in the list of available '
+      'pages:\n${_pages.reversed.map((DBPage page) => page.destination.path)}',
+    );
+
+    assert(
+      (locationIndex + 1) < _pages.length,
+      "$location is the top most, so it's make no sense to use closeUntil, "
+      'use close method to close a single location',
+    );
+
+    final List<DBPage> pagesToClose = _pages.sublist(locationIndex + 1);
+    _pages.removeRange(locationIndex + 1, _pages.length);
+
+    // Run throughout the list of pages, from the top most page first and on.
+    for (final DBPage page in pagesToClose.reversed) {
+      final Completer<Object?>? tracker = _popResultTracker.remove(
+        page.destination.path,
+      );
+
+      final Object? result = resultMap?[page.destination.path];
+
+      if (tracker != null && !tracker.isCompleted) {
+        tracker.complete(result);
+      }
+    }
   }
 
   /// Callback to handle imperative pop or operating system pop event.
@@ -374,6 +446,12 @@ extension ListOfPageBuilderExtension on Iterable<DBPageBuilder> {
       final bool supportedDestination = any(
         (DBPageBuilder pageBuilder) => pageBuilder.supportRoute(destination),
       );
+
+      if (kDebugMode) {
+        debugPrintThrottled(
+          'Did not found a page builder that can build ${destination.path}',
+        );
+      }
 
       if (supportedDestination) {
         filteredHistory.add(destination);
