@@ -1,4 +1,5 @@
 import 'package:db_navigator/db_navigator.dart';
+import 'package:example/src/nested/nested_home_screen.dart';
 import 'package:example/src/regular_demo.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,17 +17,24 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Center(
-          child: GridView.count(
-            crossAxisCount: 2,
-            children: const <Widget>[
-              _GridDemoItem(demoName: 'Regular', destination: RegularDemo.path),
-              _GridDemoItem(demoName: 'Nested', destination: '/nested'),
-              _GridDemoItem(demoName: 'Scoped', destination: '/scoped'),
-              _GridDemoItem(
-                demoName: 'Result & Arguments',
-                destination: '/result&arg',
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.only(top: 56, left: 8, right: 8),
+            child: GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              children: const <Widget>[
+                _GridDemoItem(
+                  demoName: 'Regular',
+                  destination: RegularDemo.path,
+                ),
+                _GridDemoItem(demoName: 'Nested', destination: '/nested'),
+                _GridDemoItem(demoName: 'Scoped', destination: '/scoped'),
+                _GridDemoItem(
+                  demoName: 'Result & Arguments',
+                  destination: '/result&arg',
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -80,6 +88,15 @@ class HomePageBuilder extends DBPageBuilder {
         ),
       );
     },
+    NestedHomeScreen.path: (Destination destination) {
+      return SynchronousFuture<DBPage>(
+        DBPage(
+          key: ValueKey<String>(destination.path),
+          destination: destination,
+          child: const NestedHomeScreen(),
+        ),
+      );
+    }
   };
 
   @override
