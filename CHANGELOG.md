@@ -18,3 +18,7 @@
 
 * Disallow closing a screen which is the only one in the page stack.
 * Provide possibility to close all page until a specific page is displayed.
+
+## 0.0.5
+
+* Provide option to retrieve the root DBRouterDelegate in tree of DBRouterDelegate for example nested navigation.

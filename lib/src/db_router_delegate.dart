@@ -38,8 +38,11 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   final bool reportPageUpdateToEngine;
 
   /// Get the nearest [DBRouterDelegate] from the provided [context].
-  static DBRouterDelegate of(final BuildContext context) {
-    final RouterDelegate<dynamic> delegate = Router.of(context).routerDelegate;
+  static DBRouterDelegate of(final BuildContext context, {bool root = false}) {
+    final NavigatorState navigator = Navigator.of(context, rootNavigator: root);
+
+    final RouterDelegate<dynamic> delegate =
+        Router.of(navigator.context).routerDelegate;
 
     if (delegate is DBRouterDelegate) {
       return delegate;
