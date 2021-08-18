@@ -256,7 +256,9 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     }
 
     for (final Completer<Object?> tracker in _popResultTracker.values) {
-      tracker.complete();
+      if (!tracker.isCompleted) {
+        tracker.complete();
+      }
     }
 
     notifyListeners();
