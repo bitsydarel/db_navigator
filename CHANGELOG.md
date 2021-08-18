@@ -22,3 +22,8 @@
 ## 0.0.5
 
 * Provide option to retrieve the root DBRouterDelegate in tree of DBRouterDelegate for example nested navigation.
+
+## 0.0.6
+
+* Added check if completer is future is not completed before completing it. This might happen if the pages that had
+  pending future have been disposed. 
