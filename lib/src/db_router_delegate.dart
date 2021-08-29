@@ -353,6 +353,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
         tracker.complete(result);
       }
     }
+
+    notifyListeners();
   }
 
   /// Callback to handle imperative pop or operating system pop event.
