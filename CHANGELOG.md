@@ -31,3 +31,7 @@
 ## 0.0.7
 
 * Fixed DBRouterDelegate not updating the UI after closeUntil called.
+
+## 0.0.8
+
+* Allow close until last page in stack.

@@ -327,8 +327,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     });
 
     assert(
-      locationIndex > 0,
-      '$location is the last page or not found in the list of available '
+      locationIndex >= 0,
+      '$location not found in the list of available '
       'pages:\n${_pages.reversed.map((DBPage page) => page.destination.path)}',
     );
 
