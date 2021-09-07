@@ -41,4 +41,20 @@ class DBNavigationObserver extends NavigatorObserver {
       });
     }
   }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    final RouteSettings configuration = route.settings;
+
+    if (configuration is DBPage) {
+      pageBuilders.where(
+        (ScopedPageBuilder pageBuilder) {
+          return configuration.destination.path ==
+              pageBuilder.initialDestination.path;
+        },
+      ).forEach((ScopedPageBuilder pageBuilder) {
+        pageBuilder.onInitialDestinationExited();
+      });
+    }
+  }
 }

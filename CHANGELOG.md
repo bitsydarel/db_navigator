@@ -39,3 +39,7 @@
 ## 0.0.9
 
 * Allow custom navigator observers to be provided.
+
+## 0.0.10
+
+* Add support for didRemove in DBNavigationObserver.
