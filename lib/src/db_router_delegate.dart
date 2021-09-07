@@ -25,6 +25,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   final List<DBPage> _pages;
   final List<DBPageBuilder> _pageBuilders;
   final Map<String, Completer<Object?>> _popResultTracker;
+  final List<NavigatorObserver> _customNavigatorObservers;
 
   /// Report page update to the flutter engine when the top most page changes.
   ///
@@ -95,6 +96,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     required DBPage initialPage,
     required List<DBPageBuilder> pageBuilders,
     GlobalKey<NavigatorState>? navigatorKey,
+    List<NavigatorObserver>? navigatorObservers,
     @visibleForTesting Map<String, Completer<Object?>>? popResultTracker,
     bool reportPageUpdateToEngine = false,
   }) {
@@ -113,6 +115,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
       List<DBPageBuilder>.of(pageBuilders),
       navigatorKey ?? GlobalKey<NavigatorState>(),
       popResultTracker ?? <String, Completer<Object?>>{},
+      navigatorObservers ?? <NavigatorObserver>[],
       reportPageUpdateToEngine: reportPageUpdateToEngine,
     );
   }
@@ -123,7 +126,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     this._pages,
     this._pageBuilders,
     this._navigatorKey,
-    this._popResultTracker, {
+    this._popResultTracker,
+    this._customNavigatorObservers, {
     this.reportPageUpdateToEngine = false,
   });
 
@@ -208,6 +212,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
       observers: <NavigatorObserver>[
         if (scopedPageBuilder.isNotEmpty)
           DBNavigationObserver(pageBuilders: scopedPageBuilder),
+        ..._customNavigatorObservers,
       ],
     );
   }
@@ -327,8 +332,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     });
 
     assert(
-      locationIndex > 0,
-      '$location is the last page or not found in the list of available '
+      locationIndex >= 0,
+      '$location not found in the list of available '
       'pages:\n${_pages.reversed.map((DBPage page) => page.destination.path)}',
     );
 
@@ -353,6 +358,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
         tracker.complete(result);
       }
     }
+
+    notifyListeners();
   }
 
   /// Callback to handle imperative pop or operating system pop event.

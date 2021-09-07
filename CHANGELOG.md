@@ -27,3 +27,19 @@
 
 * Added check if completer is future is not completed before completing it. This might happen if the pages that had
   pending future have been disposed. 
+
+## 0.0.7
+
+* Fixed DBRouterDelegate not updating the UI after closeUntil called.
+
+## 0.0.8
+
+* Allow close until last page in stack.
+
+## 0.0.9
+
+* Allow custom navigator observers to be provided.
+
+## 0.0.10
+
+* Add support for didRemove in DBNavigationObserver.
