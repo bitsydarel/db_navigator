@@ -35,3 +35,7 @@
 ## 0.0.8
 
 * Allow close until last page in stack.
+
+## 0.0.9
+
+* Allow custom navigator observers to be provided.
