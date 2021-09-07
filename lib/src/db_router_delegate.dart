@@ -26,6 +26,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   final List<DBPageBuilder> _pageBuilders;
   final Map<String, Completer<Object?>> _popResultTracker;
   final List<NavigatorObserver> _customNavigatorObservers;
+  final DBNavigationObserver _navigationObserver;
 
   /// Report page update to the flutter engine when the top most page changes.
   ///
@@ -115,6 +116,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
       List<DBPageBuilder>.of(pageBuilders),
       navigatorKey ?? GlobalKey<NavigatorState>(),
       popResultTracker ?? <String, Completer<Object?>>{},
+      DBNavigationObserver(),
       navigatorObservers ?? <NavigatorObserver>[],
       reportPageUpdateToEngine: reportPageUpdateToEngine,
     );
@@ -127,6 +129,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     this._pageBuilders,
     this._navigatorKey,
     this._popResultTracker,
+    this._navigationObserver,
     this._customNavigatorObservers, {
     this.reportPageUpdateToEngine = false,
   });
@@ -201,8 +204,9 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
   @override
   Widget build(BuildContext context) {
-    final List<ScopedPageBuilder> scopedPageBuilder =
-        pageBuilders.whereType<ScopedPageBuilder>().toList();
+    _navigationObserver.addAll(
+      pageBuilders.whereType<ScopedPageBuilder>().toList(),
+    );
 
     return Navigator(
       key: _navigatorKey,
@@ -210,8 +214,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
       pages: pages,
       reportsRouteUpdateToEngine: reportPageUpdateToEngine,
       observers: <NavigatorObserver>[
-        if (scopedPageBuilder.isNotEmpty)
-          DBNavigationObserver(pageBuilders: scopedPageBuilder),
+        _navigationObserver,
         ..._customNavigatorObservers,
       ],
     );
@@ -397,6 +400,18 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     }
 
     return popSucceeded;
+  }
+
+  @override
+  void dispose() {
+    _popResultTracker.values.forEach((Completer<Object?> tracker) {
+      tracker.complete();
+    });
+
+    _popResultTracker.clear();
+
+    _navigationObserver.reset();
+    super.dispose();
   }
 
   /// Check the equality between two list of destination.

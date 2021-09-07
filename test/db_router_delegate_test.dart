@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:db_navigator/src/db_navigation_observer.dart';
 import 'package:db_navigator/src/db_page.dart';
 import 'package:db_navigator/src/db_page_builder.dart';
 import 'package:db_navigator/src/db_router_delegate.dart';
@@ -223,6 +224,7 @@ void main() {
             <DBPageBuilder>[pageBuilder],
             GlobalKey<NavigatorState>(),
             trackers,
+            DBNavigationObserver(),
             <NavigatorObserver>[]);
 
         expect(routerDelegate.pages, isEmpty);
@@ -241,6 +243,7 @@ void main() {
           <DBPageBuilder>[pageBuilder],
           GlobalKey<NavigatorState>(),
           trackers,
+          DBNavigationObserver(),
           <NavigatorObserver>[],
         );
 
@@ -266,6 +269,7 @@ void main() {
             <DBPageBuilder>[pageBuilder],
             GlobalKey<NavigatorState>(),
             trackers,
+            DBNavigationObserver(),
             <NavigatorObserver>[],
           );
 
@@ -364,6 +368,7 @@ void main() {
             <DBPageBuilder>[const TestPageBuilder()],
             GlobalKey<NavigatorState>(),
             <String, Completer<Object?>>{},
+            DBNavigationObserver(),
             <NavigatorObserver>[],
             reportPageUpdateToEngine: true,
           );
@@ -389,6 +394,7 @@ void main() {
             <DBPageBuilder>[const TestPageBuilder()],
             GlobalKey<NavigatorState>(),
             trackers,
+            DBNavigationObserver(),
             <NavigatorObserver>[],
             reportPageUpdateToEngine: true,
           );
@@ -505,6 +511,7 @@ void main() {
           <DBPageBuilder>[const TestPageBuilder()],
           GlobalKey<NavigatorState>(),
           <String, Completer<Object?>>{},
+          DBNavigationObserver(),
           <NavigatorObserver>[],
         );
 
@@ -543,6 +550,7 @@ void main() {
             <DBPageBuilder>[pageBuilder],
             GlobalKey<NavigatorState>(),
             <String, Completer<Object?>>{},
+            DBNavigationObserver(),
             <NavigatorObserver>[],
           );
 
@@ -571,6 +579,7 @@ void main() {
             <DBPageBuilder>[pageBuilder],
             GlobalKey<NavigatorState>(),
             <String, Completer<Object?>>{},
+            DBNavigationObserver(),
             <NavigatorObserver>[],
           );
 
@@ -602,6 +611,7 @@ void main() {
             <DBPageBuilder>[pageBuilder],
             GlobalKey<NavigatorState>(),
             <String, Completer<Object?>>{},
+            DBNavigationObserver(),
             <NavigatorObserver>[],
           );
 

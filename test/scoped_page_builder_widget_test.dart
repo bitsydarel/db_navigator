@@ -73,6 +73,8 @@ void main() {
       when(() => mockPageBuilder.initialDestination)
           .thenReturn(initialPage.destination);
 
+      when(() => mockPageBuilder.scopeName).thenReturn('test');
+
       when(
         () => mockPageBuilder.supportRoute(
           _AdditionalFeaturePageBuilder.initialPage.destination,
@@ -133,6 +135,8 @@ void main() {
 
       when(() => mockPageBuilder.initialDestination)
           .thenReturn(initialPage.destination);
+
+      when(() => mockPageBuilder.scopeName).thenReturn('test');
 
       await tester.pumpWidget(
         MaterialApp.router(
@@ -198,6 +202,8 @@ void main() {
       when(() => mockPageBuilder.initialDestination)
           .thenReturn(initialPage.destination);
 
+      when(() => mockPageBuilder.scopeName).thenReturn('test');
+
       await tester.pumpWidget(
         MaterialApp.router(
           routerDelegate: DBRouterDelegate(
@@ -243,12 +249,15 @@ class _AdditionalFeaturePageBuilder extends ScopedPageBuilder {
   const _AdditionalFeaturePageBuilder();
 
   @override
+  Destination get initialDestination => initialPage.destination;
+
+  @override
+  String get scopeName => 'additional_feature';
+
+  @override
   Future<DBPage> buildPage(Destination destination) {
     return SynchronousFuture<DBPage>(initialPage);
   }
-
-  @override
-  Destination get initialDestination => initialPage.destination;
 
   @override
   void onInitialDestinationEntered() {
