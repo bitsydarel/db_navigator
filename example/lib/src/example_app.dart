@@ -1,4 +1,5 @@
 import 'package:db_navigator/db_navigator.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Example application.
@@ -18,6 +19,14 @@ class ExampleApp extends StatefulWidget {
 
   @override
   _ExampleAppState createState() => _ExampleAppState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(IterableProperty<DBPageBuilder>('pageBuilders', pageBuilders))
+      ..add(DiagnosticsProperty<DBPage>('initialPage', initialPage));
+  }
 }
 
 class _ExampleAppState extends State<ExampleApp> {

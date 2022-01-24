@@ -1,6 +1,6 @@
+import 'package:db_navigator/src/db_page_builder.dart';
 import 'package:db_navigator/src/db_router_delegate.dart';
 import 'package:db_navigator/src/destination.dart';
-import 'package:db_navigator/src/db_page_builder.dart';
 import 'package:flutter/widgets.dart';
 
 /// Exception to be thrown when a page is requested but there's

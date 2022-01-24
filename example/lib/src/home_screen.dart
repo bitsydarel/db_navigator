@@ -1,4 +1,6 @@
+import 'package:collection/collection.dart';
 import 'package:db_navigator/db_navigator.dart';
+import 'package:example/src/args_demo_screen.dart';
 import 'package:example/src/nested/nested_home_screen.dart';
 import 'package:example/src/regular_demo.dart';
 import 'package:flutter/foundation.dart';
@@ -28,10 +30,9 @@ class HomeScreen extends StatelessWidget {
                   destination: RegularDemo.path,
                 ),
                 _GridDemoItem(demoName: 'Nested', destination: '/nested'),
-                _GridDemoItem(demoName: 'Scoped', destination: '/scoped'),
                 _GridDemoItem(
                   demoName: 'Result & Arguments',
-                  destination: '/result&arg',
+                  destination: ArgsDemoScreen.path,
                 ),
               ],
             ),
@@ -42,7 +43,6 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// diagnostic_describe_all_properties
 class _GridDemoItem extends StatelessWidget {
   final String demoName;
 
@@ -63,6 +63,14 @@ class _GridDemoItem extends StatelessWidget {
       child: Card(elevation: 2, child: Center(child: Text(demoName))),
     );
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('destination', destination))
+      ..add(StringProperty('demoName', demoName));
+  }
 }
 
 /// Home page builder.
@@ -75,7 +83,7 @@ class HomePageBuilder extends DBPageBuilder {
   );
 
   static final Map<String, DestinationPageFactory> _stack =
-      <String, DestinationPageFactory>{
+  <String, DestinationPageFactory>{
     HomeScreen.path: (Destination destination) {
       return SynchronousFuture<DBPage>(initialPage);
     },
@@ -96,12 +104,28 @@ class HomePageBuilder extends DBPageBuilder {
           child: const NestedHomeScreen(),
         ),
       );
+    },
+    ArgsDemoScreen.path: (Destination destination) {
+      return SynchronousFuture<DBPage>(
+        DBPage(
+          key: ValueKey<String>(destination.path),
+          destination: destination,
+          child: ArgsDemoScreen(
+            argument: destination.metadata.arguments?.toString(),
+          ),
+        ),
+      );
     }
   };
 
   @override
   Future<DBPage> buildPage(Destination destination) {
-    final DestinationPageFactory? pageFactory = _stack[destination.path];
+    debugPrintThrottled(destination.path);
+
+    final DestinationPageFactory? pageFactory = _stack[destination.path] ??
+        _stack[_stack.keys.firstWhereOrNull(
+          (String knownPath) => destination.path.startsWith(knownPath),
+        )];
 
     if (pageFactory != null) {
       return pageFactory(destination);
@@ -112,6 +136,9 @@ class HomePageBuilder extends DBPageBuilder {
 
   @override
   bool supportRoute(Destination destination) {
-    return _stack.containsKey(destination.path);
+    return _stack.containsKey(destination.path) ||
+        _stack.keys.any(
+          (String knownPath) => destination.path.startsWith(knownPath),
+        );
   }
 }

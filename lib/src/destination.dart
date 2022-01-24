@@ -1,7 +1,7 @@
+import 'package:db_navigator/src/destination_argument_converter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:db_navigator/src/destination_argument_converter.dart';
 
 part 'destination.g.dart';
 
@@ -25,9 +25,7 @@ class Destination {
   });
 
   /// Create a [Destination] from [RouteInformation].
-  factory Destination.fromRouteInformation(
-    RouteInformation routeInformation,
-  ) {
+  factory Destination.fromRouteInformation(RouteInformation routeInformation,) {
     final Object? argument = routeInformation.state;
     return Destination(
       path: routeInformation.location ?? '' /*TODO think how to handle null*/,
@@ -63,10 +61,10 @@ class Destination {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Destination &&
-          runtimeType == other.runtimeType &&
-          path == other.path &&
-          metadata == other.metadata;
+          other is Destination &&
+              runtimeType == other.runtimeType &&
+              path == other.path &&
+              metadata == other.metadata;
 
   @override
   int get hashCode => path.hashCode ^ metadata.hashCode;
@@ -136,10 +134,10 @@ class DestinationMetadata {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DestinationMetadata &&
-          runtimeType == other.runtimeType &&
-          arguments == other.arguments &&
-          listEquals<Destination>(history, other.history);
+          other is DestinationMetadata &&
+              runtimeType == other.runtimeType &&
+              arguments == other.arguments &&
+              listEquals<Destination>(history, other.history);
 
   @override
   int get hashCode => arguments.hashCode ^ history.hashCode;

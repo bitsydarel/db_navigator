@@ -1,12 +1,12 @@
 library db_navigator;
 
-export 'package:db_navigator/src/exceptions.dart';
-export 'package:db_navigator/src/destination.dart';
 export 'package:db_navigator/src/db_page.dart';
 export 'package:db_navigator/src/db_page_builder.dart';
 export 'package:db_navigator/src/db_route_information_parser.dart';
 export 'package:db_navigator/src/db_router_delegate.dart';
+export 'package:db_navigator/src/destination.dart';
 export 'package:db_navigator/src/destination_argument_converter.dart';
+export 'package:db_navigator/src/exceptions.dart';
 export 'package:db_navigator/src/scoped_page_builder.dart';
 
 /// DB Navigator.
@@ -15,7 +15,8 @@ export 'package:db_navigator/src/scoped_page_builder.dart';
 abstract class DBNavigator {
   /// Navigate to the following [location].
   ///
-  /// [location] to navigate to, must not be null.
+  /// [location] to navigate to. Must be unique in the current navigation stack.
+  ///
   /// [arguments] to pass at the location.
   Future<T?> navigateTo<T extends Object?>({
     required final String location,

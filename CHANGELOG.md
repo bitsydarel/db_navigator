@@ -44,11 +44,17 @@
 
 * Added support for didRemove in DBNavigationObserver.
 
-## 0.0.10
+## 0.0.11
 
 * Added support for reset, that reset the state of the DBNavigationObserver.
 * Added support for addAll, that add more ScopedPageBuilders to DBNavigationObserver.
 * Added support for custom navigation observer for the DBRouterDelegate.
 * Added support for dispose for the DBRouterDelegate, this is useful in a tree of DBRouterDelegate.
 * Added scopeName getter to ScopedPageBuilder, so they can be differentiated.
-* Fixed issue in DBNavigationObserver when the observer page builder list has changed but the event to exit ongoing scope has not yet been dispatched.
+* Fixed issue in DBNavigationObserver when the observer page builder list has changed but the event to exit ongoing
+  scope has not yet been dispatched.
+
+## 0.0.12
+
+* Updated dependencies of the library.
+* Update code to match new lint rules.

@@ -6,7 +6,7 @@ import 'package:mocktail/mocktail.dart';
 
 void main() {
   setUpAll(() {
-    registerFallbackValue<Destination>(const Destination(path: '/'));
+    registerFallbackValue(const Destination(path: '/'));
   });
 
   testWidgets(

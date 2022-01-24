@@ -88,6 +88,12 @@ class _DBRouterDelegateLookUpWidget extends StatelessWidget {
     delegate = DBRouterDelegate.of(context);
     return const SizedBox(height: 100, width: 100);
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<DBRouterDelegate>('delegate', delegate));
+  }
 }
 
 class _TestRouterDelegate extends RouterDelegate<Destination>

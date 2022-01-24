@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:db_navigator/src/destination.dart';
+import 'package:flutter/material.dart';
 
 /// Transport Group Exchange representation of a [DBPage]
 class DBPage extends MaterialPage<Object?> {
@@ -8,6 +8,8 @@ class DBPage extends MaterialPage<Object?> {
 
   /// Create a [DBPage] with [key] identifying the page, [destination] of the
   /// page and [child] to put at that destination.
+  ///
+  /// Note: [key] should be non-existent in the current navigation stack.
   DBPage({
     required LocalKey key,
     required this.destination,
@@ -19,7 +21,7 @@ class DBPage extends MaterialPage<Object?> {
           arguments: destination.metadata,
           child: child,
           maintainState: true,
-          fullscreenDialog: false,
-          restorationId: restorationId,
-        );
+    fullscreenDialog: false,
+    restorationId: restorationId,
+  );
 }
