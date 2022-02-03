@@ -1,3 +1,5 @@
+library exceptions;
+
 import 'package:db_navigator/src/db_page_builder.dart';
 import 'package:db_navigator/src/db_router_delegate.dart';
 import 'package:db_navigator/src/destination.dart';
@@ -29,4 +31,19 @@ class DBRouterDelegateNotFoundException implements Exception {
 
   @override
   String toString() => '$DBRouterDelegate not found in the context';
+}
+
+/// An exception to be thrown when [DBRouterDelegate]
+/// could not close the requested page.
+class DBRouterDelegateCantClosePageException implements Exception {
+  /// Create a [DBRouterDelegateCantClosePageException].
+  const DBRouterDelegateCantClosePageException(this.message);
+
+  /// The message explaining the reason why this exception was thrown.
+  final String message;
+
+  @override
+  String toString() {
+    return 'DBRouterDelegateCantClosePageException {\n\t$message\n}';
+  }
 }

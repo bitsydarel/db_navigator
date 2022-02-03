@@ -58,3 +58,8 @@
 
 * Updated dependencies of the library.
 * Update code to match new lint rules.
+
+## 0.0.13
+
+* Added closeUntilLast functionality.
+* Added DBRouterDelegateCantClosePageException so that in release mode, we can also be aware of wrong usage.

@@ -321,19 +321,42 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   }
 
   @override
-  void closeUntil({required String location, Map<String, Object?>? resultMap}) {
+  void closeUntilLast({Map<String, Object?>? resultMap}) {
     assert(_pages.isNotEmpty, "there's no page in the stack to close");
-    assert(_pages.length > 1, "You can't remove the only page in the stack");
+
+    if (_pages.length == 1) {
+      return;
+    }
+
+    final Destination lastPageDestination = _pages.first.destination;
+
+    closeUntil(location: lastPageDestination.path);
+  }
+
+  @override
+  void closeUntil({required String location, Map<String, Object?>? resultMap}) {
+    if (_pages.isEmpty) {
+      throw const DBRouterDelegateCantClosePageException(
+        "there's no page in the stack to close",
+      );
+    }
+
+    if (_pages.length < 2) {
+      throw const DBRouterDelegateCantClosePageException(
+        "You can't remove the only page in the stack",
+      );
+    }
 
     final int locationIndex = _pages.indexWhere((DBPage page) {
       return page.destination.path == location;
     });
 
-    assert(
-      locationIndex >= 0,
-      '$location not found in the list of available '
-      'pages:\n${_pages.reversed.map((DBPage page) => page.destination.path)}',
-    );
+    if (locationIndex < 0) {
+      throw DBRouterDelegateCantClosePageException(
+        '$location not found in the list of available\nPages: '
+        '${_pages.reversed.map((DBPage page) => page.destination.path)}',
+      );
+    }
 
     assert(
       (locationIndex + 1) < _pages.length,

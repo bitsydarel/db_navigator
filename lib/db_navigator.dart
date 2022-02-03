@@ -35,6 +35,12 @@ abstract class DBNavigator {
   /// [result] is the value by which [navigateTo] future complete.
   void close<T extends Object?>([final T result]);
 
+  /// Close the current top most location and every location after it until
+  /// the last location is visible.
+  ///
+  /// [resultMap] of [String] location path to [Object] as result for screen.
+  void closeUntilLast({final Map<String, Object?>? resultMap});
+
   /// Close the current top most location and
   /// every location after it until [location] is visible.
   ///
