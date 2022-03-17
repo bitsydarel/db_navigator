@@ -5,19 +5,19 @@ import 'package:flutter/widgets.dart';
 /// Navigator observer that the navigation changes of it's [Navigator].
 class DBNavigationObserver extends NavigatorObserver {
   /// List of [ScopedPageBuilder] to track entering and exiting events.
-  final Set<ScopedPageBuilder> _currentPageBuilders;
-  final Set<ScopedPageBuilder> _releasablePageBuilders;
+  final List<ScopedPageBuilder> _currentPageBuilders;
+  final List<ScopedPageBuilder> _releasablePageBuilders;
 
   /// Create a [DBNavigationObserver] with the list of
   DBNavigationObserver({
     List<ScopedPageBuilder>? initialPageBuilders,
     List<ScopedPageBuilder>? releasablePageBuilders,
-  })  : _currentPageBuilders = <ScopedPageBuilder>{
+  })  : _currentPageBuilders = <ScopedPageBuilder>[
           if (initialPageBuilders != null) ...initialPageBuilders,
-        },
-        _releasablePageBuilders = <ScopedPageBuilder>{
+        ],
+        _releasablePageBuilders = <ScopedPageBuilder>[
           if (releasablePageBuilders != null) ...releasablePageBuilders,
-        };
+        ];
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
@@ -31,6 +31,7 @@ class DBNavigationObserver extends NavigatorObserver {
         },
       ).forEach((ScopedPageBuilder pageBuilder) {
         pageBuilder.onInitialDestinationEntered();
+        _releasablePageBuilders.add(pageBuilder);
       });
     }
   }
@@ -55,21 +56,19 @@ class DBNavigationObserver extends NavigatorObserver {
 
   /// Add [newPageBuilders] to the list of tracked page builders.
   void addAll(final List<ScopedPageBuilder> newPageBuilders) {
-    for (final ScopedPageBuilder currentPageBuilder in _currentPageBuilders) {
-      final bool pageBuilderExist = newPageBuilders.any(
+    for (final ScopedPageBuilder newPageBuilder in newPageBuilders) {
+      final bool pageBuilderExist = _currentPageBuilders.any(
         (ScopedPageBuilder newPageBuilder) {
-          return newPageBuilder.scopeName == currentPageBuilder.scopeName;
+          return newPageBuilder.scopeName == newPageBuilder.scopeName;
         },
       );
 
       // if the page builder does not exist in the new list of page builders.
       // it's means that it's page builder is no longer necessary.
       if (!pageBuilderExist) {
-        _releasablePageBuilders.add(currentPageBuilder);
+        _currentPageBuilders.add(newPageBuilder);
       }
     }
-
-    _currentPageBuilders.addAll(newPageBuilders);
   }
 
   /// Dispose the [DBNavigationObserver].
@@ -92,32 +91,39 @@ class DBNavigationObserver extends NavigatorObserver {
   /// Exit the [ScopedPageBuilder] with initial destination matching the [page].
   @visibleForTesting
   void exitPageBuilderScope(DBPage page) {
-    _currentPageBuilders
-        .where(
-          (ScopedPageBuilder pageBuilder) {
-            return page.destination.path == pageBuilder.initialDestination.path;
-          },
-        )
-        .toList()
-        .forEach(
-          (ScopedPageBuilder pageBuilder) {
-            // notify the pageBuilder that it's initial destination is exited.
-            pageBuilder.onInitialDestinationExited();
+    _currentPageBuilders.removeWhere(
+      (ScopedPageBuilder pageBuilder) {
+        return page.destination.path == pageBuilder.initialDestination.path;
+      },
+    );
 
-            if (_releasablePageBuilders.contains(pageBuilder)) {
-              _currentPageBuilders.removeWhere(
-                (ScopedPageBuilder obsoletePageBuilder) {
-                  return obsoletePageBuilder.scopeName == pageBuilder.scopeName;
-                },
-              );
+    final List<ScopedPageBuilder> releasable = _releasablePageBuilders.where(
+      (ScopedPageBuilder pageBuilder) {
+        return page.destination.path == pageBuilder.initialDestination.path;
+      },
+    ).toList();
 
-              _releasablePageBuilders.removeWhere(
-                (ScopedPageBuilder obsoletePageBuilder) {
-                  return obsoletePageBuilder.scopeName == pageBuilder.scopeName;
-                },
-              );
-            }
-          },
-        );
+    for (final ScopedPageBuilder pageBuilder in releasable) {
+      pageBuilder.onInitialDestinationExited();
+      _releasablePageBuilders.remove(pageBuilder);
+    }
+
+    // final int builderIndex = _currentPageBuilders.lastIndexWhere(
+    //   (ScopedPageBuilder pageBuilder) {
+    //     return page.destination.path == pageBuilder.initialDestination.path;
+    //   },
+    // );
+    //
+    // final int startIndex = _currentPageBuilders.length - 1;
+    //
+    // for (int index = startIndex; index >= builderIndex; index--) {
+    //   final ScopedPageBuilder pageBuilder = _currentPageBuilders[index]
+    //     ..onInitialDestinationExited();
+    //
+    //   if (_releasablePageBuilders.contains(pageBuilder)) {
+    //     _currentPageBuilders.remove(pageBuilder);
+    //     _releasablePageBuilders.remove(pageBuilder);
+    //   }
+    // }
   }
 }
