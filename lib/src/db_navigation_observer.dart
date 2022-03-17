@@ -79,7 +79,9 @@ class DBNavigationObserver extends NavigatorObserver {
     _currentPageBuilders
       ..forEach(
         (ScopedPageBuilder pageBuilder) {
-          pageBuilder.onInitialDestinationExited();
+          if (_releasablePageBuilders.contains(pageBuilder)) {
+            pageBuilder.onInitialDestinationExited();
+          }
         },
       )
       ..clear();

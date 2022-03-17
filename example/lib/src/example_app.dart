@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 /// Example application.
 class ExampleApp extends StatefulWidget {
   /// The initial page of the application.
-  final DBPage initialPage;
+  final DBMaterialPage initialPage;
 
   /// The application [Page] builder.
   final List<DBPageBuilder> pageBuilders;
@@ -25,7 +25,7 @@ class ExampleApp extends StatefulWidget {
     super.debugFillProperties(properties);
     properties
       ..add(IterableProperty<DBPageBuilder>('pageBuilders', pageBuilders))
-      ..add(DiagnosticsProperty<DBPage>('initialPage', initialPage));
+      ..add(DiagnosticsProperty<DBMaterialPage>('initialPage', initialPage));
   }
 }
 

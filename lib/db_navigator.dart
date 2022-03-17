@@ -7,6 +7,10 @@ export 'package:db_navigator/src/db_router_delegate.dart';
 export 'package:db_navigator/src/destination.dart';
 export 'package:db_navigator/src/destination_argument_converter.dart';
 export 'package:db_navigator/src/exceptions.dart';
+export 'package:db_navigator/src/page_transitions/enter_from_left_exit_to_left_page_transition.dart';
+export 'package:db_navigator/src/page_transitions/enter_from_right_exit_to_left_page_transition.dart';
+export 'package:db_navigator/src/page_transitions/enter_from_right_page_transition.dart';
+export 'package:db_navigator/src/page_transitions/fade_in_page_transition.dart';
 export 'package:db_navigator/src/scoped_page_builder.dart';
 
 /// DB Navigator.

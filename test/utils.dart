@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 const String unknownPath = '/unknown';
 
-/// A [DBPageBuilder] that does not support building a [DBPage].
+/// A [DBPageBuilder] that does not support building a [DBMaterialPage].
 ///
 /// [supportRoute] return false always.
 ///
@@ -24,7 +24,7 @@ class RejectingPageBuilder extends DBPageBuilder {
 class TestPageBuilder implements DBPageBuilder {
   const TestPageBuilder();
 
-  static final DBPage initialPage = DBPage(
+  static final DBPage initialPage = DBMaterialPage(
     key: const ValueKey<String>(Page1.path),
     destination: const Destination(path: Page1.path),
     child: const Page1(),
@@ -51,7 +51,7 @@ class TestPageBuilder implements DBPageBuilder {
         throw PageNotFoundException(destination);
     }
 
-    return DBPage(
+    return DBMaterialPage(
       key: ValueKey<String>(destination.path),
       destination: destination,
       child: child,
@@ -124,8 +124,8 @@ class WidgetPageBuilder extends DBPageBuilder {
 
   @override
   Future<DBPage> buildPage(Destination destination) {
-    return SynchronousFuture<DBPage>(
-      DBPage(
+    return SynchronousFuture<DBMaterialPage>(
+      DBMaterialPage(
         key: key,
         destination: destination,
         child: child,

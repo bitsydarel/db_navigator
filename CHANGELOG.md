@@ -63,3 +63,8 @@
 
 * Added closeUntilLast functionality.
 * Added DBRouterDelegateCantClosePageException so that in release mode, we can also be aware of wrong usage.
+
+## 0.1.0
+
+* Close the 
+
