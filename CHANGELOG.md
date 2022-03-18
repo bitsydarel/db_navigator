@@ -66,5 +66,7 @@
 
 ## 0.1.0
 
-* Close the 
-
+* Update the library to provide support for both Material and Cupertino.
+* Updated algorithm logic for scoped page builder entering and exiting events.
+* Added default db page transitions for both material and cupertino.
+* Fixed example for arguments.

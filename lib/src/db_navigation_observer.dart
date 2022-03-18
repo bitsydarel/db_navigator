@@ -6,17 +6,17 @@ import 'package:flutter/widgets.dart';
 class DBNavigationObserver extends NavigatorObserver {
   /// List of [ScopedPageBuilder] to track entering and exiting events.
   final List<ScopedPageBuilder> _currentPageBuilders;
-  final List<ScopedPageBuilder> _releasablePageBuilders;
+  final List<ScopedPageBuilder> _pushedPageBuilders;
 
   /// Create a [DBNavigationObserver] with the list of
   DBNavigationObserver({
     List<ScopedPageBuilder>? initialPageBuilders,
-    List<ScopedPageBuilder>? releasablePageBuilders,
+    List<ScopedPageBuilder>? pushedPageBuilders,
   })  : _currentPageBuilders = <ScopedPageBuilder>[
           if (initialPageBuilders != null) ...initialPageBuilders,
         ],
-        _releasablePageBuilders = <ScopedPageBuilder>[
-          if (releasablePageBuilders != null) ...releasablePageBuilders,
+        _pushedPageBuilders = <ScopedPageBuilder>[
+          if (pushedPageBuilders != null) ...pushedPageBuilders,
         ];
 
   @override
@@ -31,7 +31,9 @@ class DBNavigationObserver extends NavigatorObserver {
         },
       ).forEach((ScopedPageBuilder pageBuilder) {
         pageBuilder.onInitialDestinationEntered();
-        _releasablePageBuilders.add(pageBuilder);
+        // Since the page builder initial destination has been push.
+        // This page builder can be released when needed.
+        _pushedPageBuilders.add(pageBuilder);
       });
     }
   }
@@ -55,37 +57,25 @@ class DBNavigationObserver extends NavigatorObserver {
   }
 
   /// Add [newPageBuilders] to the list of tracked page builders.
-  void addAll(final List<ScopedPageBuilder> newPageBuilders) {
-    for (final ScopedPageBuilder newPageBuilder in newPageBuilders) {
-      final bool pageBuilderExist = _currentPageBuilders.any(
-        (ScopedPageBuilder newPageBuilder) {
-          return newPageBuilder.scopeName == newPageBuilder.scopeName;
-        },
-      );
-
-      // if the page builder does not exist in the new list of page builders.
-      // it's means that it's page builder is no longer necessary.
-      if (!pageBuilderExist) {
-        _currentPageBuilders.add(newPageBuilder);
-      }
-    }
+  void addAll(List<ScopedPageBuilder> newPageBuilders) {
+    _currentPageBuilders
+      ..clear()
+      ..addAll(newPageBuilders);
   }
 
   /// Dispose the [DBNavigationObserver].
   ///
   /// Will stop tracking scope of all [ScopedPageBuilder], registered.
   void reset() {
-    _currentPageBuilders
+    _currentPageBuilders.clear();
+
+    _pushedPageBuilders
       ..forEach(
         (ScopedPageBuilder pageBuilder) {
-          if (_releasablePageBuilders.contains(pageBuilder)) {
-            pageBuilder.onInitialDestinationExited();
-          }
+          pageBuilder.onInitialDestinationExited();
         },
       )
       ..clear();
-
-    _releasablePageBuilders.clear();
   }
 
   /// Exit the [ScopedPageBuilder] with initial destination matching the [page].
@@ -97,7 +87,7 @@ class DBNavigationObserver extends NavigatorObserver {
       },
     );
 
-    final List<ScopedPageBuilder> releasable = _releasablePageBuilders.where(
+    final List<ScopedPageBuilder> releasable = _pushedPageBuilders.where(
       (ScopedPageBuilder pageBuilder) {
         return page.destination.path == pageBuilder.initialDestination.path;
       },
@@ -105,25 +95,7 @@ class DBNavigationObserver extends NavigatorObserver {
 
     for (final ScopedPageBuilder pageBuilder in releasable) {
       pageBuilder.onInitialDestinationExited();
-      _releasablePageBuilders.remove(pageBuilder);
+      _pushedPageBuilders.remove(pageBuilder);
     }
-
-    // final int builderIndex = _currentPageBuilders.lastIndexWhere(
-    //   (ScopedPageBuilder pageBuilder) {
-    //     return page.destination.path == pageBuilder.initialDestination.path;
-    //   },
-    // );
-    //
-    // final int startIndex = _currentPageBuilders.length - 1;
-    //
-    // for (int index = startIndex; index >= builderIndex; index--) {
-    //   final ScopedPageBuilder pageBuilder = _currentPageBuilders[index]
-    //     ..onInitialDestinationExited();
-    //
-    //   if (_releasablePageBuilders.contains(pageBuilder)) {
-    //     _currentPageBuilders.remove(pageBuilder);
-    //     _releasablePageBuilders.remove(pageBuilder);
-    //   }
-    // }
   }
 }
