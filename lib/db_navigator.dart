@@ -1,12 +1,16 @@
 library db_navigator;
 
-export 'package:db_navigator/src/exceptions.dart';
-export 'package:db_navigator/src/destination.dart';
 export 'package:db_navigator/src/db_page.dart';
 export 'package:db_navigator/src/db_page_builder.dart';
 export 'package:db_navigator/src/db_route_information_parser.dart';
 export 'package:db_navigator/src/db_router_delegate.dart';
+export 'package:db_navigator/src/destination.dart';
 export 'package:db_navigator/src/destination_argument_converter.dart';
+export 'package:db_navigator/src/exceptions.dart';
+export 'package:db_navigator/src/page_transitions/enter_from_left_exit_to_left_page_transition.dart';
+export 'package:db_navigator/src/page_transitions/enter_from_right_exit_to_left_page_transition.dart';
+export 'package:db_navigator/src/page_transitions/enter_from_right_page_transition.dart';
+export 'package:db_navigator/src/page_transitions/fade_in_page_transition.dart';
 export 'package:db_navigator/src/scoped_page_builder.dart';
 
 /// DB Navigator.
@@ -15,7 +19,8 @@ export 'package:db_navigator/src/scoped_page_builder.dart';
 abstract class DBNavigator {
   /// Navigate to the following [location].
   ///
-  /// [location] to navigate to, must not be null.
+  /// [location] to navigate to. Must be unique in the current navigation stack.
+  ///
   /// [arguments] to pass at the location.
   Future<T?> navigateTo<T extends Object?>({
     required final String location,
@@ -33,6 +38,12 @@ abstract class DBNavigator {
   ///
   /// [result] is the value by which [navigateTo] future complete.
   void close<T extends Object?>([final T result]);
+
+  /// Close the current top most location and every location after it until
+  /// the last location is visible.
+  ///
+  /// [resultMap] of [String] location path to [Object] as result for screen.
+  void closeUntilLast({final Map<String, Object?>? resultMap});
 
   /// Close the current top most location and
   /// every location after it until [location] is visible.

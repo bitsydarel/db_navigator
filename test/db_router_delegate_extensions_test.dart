@@ -1,8 +1,8 @@
-import 'package:db_navigator/src/db_page_builder.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:db_navigator/src/destination.dart';
 import 'package:db_navigator/src/db_page.dart';
+import 'package:db_navigator/src/db_page_builder.dart';
 import 'package:db_navigator/src/db_router_delegate.dart';
+import 'package:db_navigator/src/destination.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'utils.dart';
 

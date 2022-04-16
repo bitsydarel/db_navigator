@@ -7,13 +7,17 @@ part of 'destination.dart';
 // **************************************************************************
 
 Destination _$DestinationFromJson(Map<String, dynamic> json) {
-  $checkKeys(json,
-      requiredKeys: const ['path'],
-      disallowNullValues: const ['path', 'metadata']);
+  $checkKeys(
+    json,
+    requiredKeys: const ['path'],
+    disallowNullValues: const ['path', 'metadata'],
+  );
   return Destination(
     path: json['path'] as String,
-    metadata:
-        DestinationMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
+    metadata: json['metadata'] == null
+        ? const DestinationMetadata()
+        : DestinationMetadata.fromJson(
+            json['metadata'] as Map<String, dynamic>),
   );
 }
 
@@ -24,7 +28,10 @@ Map<String, dynamic> _$DestinationToJson(Destination instance) =>
     };
 
 DestinationMetadata _$DestinationMetadataFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, disallowNullValues: const ['arguments', 'history']);
+  $checkKeys(
+    json,
+    disallowNullValues: const ['arguments', 'history'],
+  );
   return DestinationMetadata(
     arguments: DestinationArgumentConverter.pojoFromJson(json['arguments']),
     history: DestinationMetadata._fromJson(json['history']),

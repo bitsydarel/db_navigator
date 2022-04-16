@@ -1,4 +1,6 @@
+import 'package:collection/collection.dart';
 import 'package:db_navigator/db_navigator.dart';
+import 'package:example/src/args_demo_screen.dart';
 import 'package:example/src/nested/nested_home_screen.dart';
 import 'package:example/src/regular_demo.dart';
 import 'package:flutter/foundation.dart';
@@ -28,10 +30,9 @@ class HomeScreen extends StatelessWidget {
                   destination: RegularDemo.path,
                 ),
                 _GridDemoItem(demoName: 'Nested', destination: '/nested'),
-                _GridDemoItem(demoName: 'Scoped', destination: '/scoped'),
                 _GridDemoItem(
                   demoName: 'Result & Arguments',
-                  destination: '/result&arg',
+                  destination: ArgsDemoScreen.path,
                 ),
               ],
             ),
@@ -42,7 +43,6 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// diagnostic_describe_all_properties
 class _GridDemoItem extends StatelessWidget {
   final String demoName;
 
@@ -63,55 +63,12 @@ class _GridDemoItem extends StatelessWidget {
       child: Card(elevation: 2, child: Center(child: Text(demoName))),
     );
   }
-}
-
-/// Home page builder.
-class HomePageBuilder extends DBPageBuilder {
-  /// Initial page.
-  static final DBPage initialPage = DBPage(
-    key: const ValueKey<String>(HomeScreen.path),
-    destination: const Destination(path: HomeScreen.path),
-    child: const HomeScreen(),
-  );
-
-  static final Map<String, DestinationPageFactory> _stack =
-      <String, DestinationPageFactory>{
-    HomeScreen.path: (Destination destination) {
-      return SynchronousFuture<DBPage>(initialPage);
-    },
-    RegularDemo.path: (Destination destination) {
-      return SynchronousFuture<DBPage>(
-        DBPage(
-          key: const ValueKey<String>(RegularDemo.path),
-          destination: destination,
-          child: const RegularDemo(),
-        ),
-      );
-    },
-    NestedHomeScreen.path: (Destination destination) {
-      return SynchronousFuture<DBPage>(
-        DBPage(
-          key: ValueKey<String>(destination.path),
-          destination: destination,
-          child: const NestedHomeScreen(),
-        ),
-      );
-    }
-  };
 
   @override
-  Future<DBPage> buildPage(Destination destination) {
-    final DestinationPageFactory? pageFactory = _stack[destination.path];
-
-    if (pageFactory != null) {
-      return pageFactory(destination);
-    }
-
-    return Future<DBPage>.error(PageNotFoundException(destination));
-  }
-
-  @override
-  bool supportRoute(Destination destination) {
-    return _stack.containsKey(destination.path);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(StringProperty('destination', destination))
+      ..add(StringProperty('demoName', demoName));
   }
 }

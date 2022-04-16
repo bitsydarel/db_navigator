@@ -1,13 +1,15 @@
 import 'dart:async';
+
 import 'package:db_navigator/src/db_navigation_observer.dart';
 import 'package:db_navigator/src/db_page.dart';
 import 'package:db_navigator/src/db_page_builder.dart';
 import 'package:db_navigator/src/db_router_delegate.dart';
 import 'package:db_navigator/src/destination.dart';
 import 'package:db_navigator/src/exceptions.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+
 import 'utils.dart';
 
 void main() {
@@ -519,7 +521,7 @@ void main() {
 
         expect(
           () => routerDelegate.closeUntil(location: Page1.path),
-          throwsAssertionError,
+          throwsA(isA<DBRouterDelegateCantClosePageException>()),
         );
       });
 
@@ -532,8 +534,8 @@ void main() {
         expect(routerDelegate.pages, hasLength(equals(1)));
 
         expect(
-          () => routerDelegate.closeUntil(location: Page2.path),
-          throwsAssertionError,
+              () => routerDelegate.closeUntil(location: Page2.path),
+          throwsA(isA<DBRouterDelegateCantClosePageException>()),
         );
       });
 
@@ -557,8 +559,8 @@ void main() {
           expect(routerDelegate.pages, hasLength(2));
 
           expect(
-            () => routerDelegate.closeUntil(location: Page3.path),
-            throwsAssertionError,
+                () => routerDelegate.closeUntil(location: Page3.path),
+            throwsA(isA<DBRouterDelegateCantClosePageException>()),
           );
         },
       );
@@ -629,6 +631,89 @@ void main() {
       );
     },
   );
+
+  group('closeUntilLast', () {
+    test('should throw assert error if pages list is empty', () {
+      final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+        <DBPage>[],
+        <DBPageBuilder>[const TestPageBuilder()],
+        GlobalKey<NavigatorState>(),
+        <String, Completer<Object?>>{},
+        DBNavigationObserver(),
+        <NavigatorObserver>[],
+      );
+
+      expect(routerDelegate.pages, isEmpty);
+
+      expect(
+        routerDelegate.closeUntilLast,
+        throwsAssertionError,
+      );
+    });
+
+    test(
+      'should remove no page if the current page is the only page in the stack',
+      () async {
+        const TestPageBuilder pageBuilder = TestPageBuilder();
+
+        final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+          <DBPage>[TestPageBuilder.initialPage],
+          <DBPageBuilder>[pageBuilder],
+          GlobalKey<NavigatorState>(),
+          <String, Completer<Object?>>{},
+          DBNavigationObserver(),
+          <NavigatorObserver>[],
+        );
+
+        expect(routerDelegate.pages, hasLength(equals(1)));
+
+        routerDelegate.closeUntilLast();
+
+        expect(routerDelegate.pages, hasLength(equals(1)));
+
+        expect(
+          routerDelegate.pages,
+          containsAllInOrder(<DBPage>[TestPageBuilder.initialPage]),
+        );
+      },
+    );
+
+    test(
+      'should remove pages until the last page is visible',
+      () async {
+        const TestPageBuilder pageBuilder = TestPageBuilder();
+
+        final DBPage page2 =
+            await pageBuilder.buildPage(const Destination(path: Page2.path));
+
+        final DBPage page3 =
+            await pageBuilder.buildPage(const Destination(path: Page3.path));
+
+        final DBPage page4 =
+            await pageBuilder.buildPage(const Destination(path: Page4.path));
+
+        final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
+          <DBPage>[TestPageBuilder.initialPage, page2, page3, page4],
+          <DBPageBuilder>[pageBuilder],
+          GlobalKey<NavigatorState>(),
+          <String, Completer<Object?>>{},
+          DBNavigationObserver(),
+          <NavigatorObserver>[],
+        );
+
+        expect(routerDelegate.pages, hasLength(equals(4)));
+
+        routerDelegate.closeUntilLast();
+
+        expect(routerDelegate.pages, hasLength(equals(1)));
+
+        expect(
+          routerDelegate.pages,
+          containsAllInOrder(<DBPage>[TestPageBuilder.initialPage]),
+        );
+      },
+    );
+  });
 }
 
 class _MockRoute extends Mock implements Route<Object?> {}

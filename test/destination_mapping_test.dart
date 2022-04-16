@@ -1,9 +1,8 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:db_navigator/src/destination.dart';
 import 'package:db_navigator/src/destination_argument_converter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

@@ -6,13 +6,13 @@ import 'package:mocktail/mocktail.dart';
 
 void main() {
   setUpAll(() {
-    registerFallbackValue<Destination>(const Destination(path: '/'));
+    registerFallbackValue(const Destination(path: '/'));
   });
 
   testWidgets(
     'should call onInitialDestinationEntered when initial page is pushed',
     (WidgetTester tester) async {
-      final DBPage initialPage = DBPage(
+      final DBMaterialPage initialPage = DBMaterialPage(
         key: const ValueKey<String>('/'),
         destination: const Destination(path: '/'),
         child: const Placeholder(),
@@ -24,7 +24,7 @@ void main() {
           .thenReturn(true);
 
       when(() => mockPageBuilder.buildPage(initialPage.destination))
-          .thenAnswer((_) => SynchronousFuture<DBPage>(initialPage));
+          .thenAnswer((_) => SynchronousFuture<DBMaterialPage>(initialPage));
 
       when(() => mockPageBuilder.initialDestination)
           .thenReturn(initialPage.destination);
@@ -51,7 +51,7 @@ void main() {
     (WidgetTester tester) async {
       final _MockScopedPageBuilder mockPageBuilder = _MockScopedPageBuilder();
 
-      final DBPage initialPage = DBPage(
+      final DBMaterialPage initialPage = DBMaterialPage(
         key: const ValueKey<String>('/second'),
         destination: const Destination(path: '/second'),
         child: const Placeholder(),
@@ -68,7 +68,7 @@ void main() {
       ).thenReturn(true);
 
       when(() => mockPageBuilder.buildPage(any(that: pathMatcher)))
-          .thenAnswer((_) => SynchronousFuture<DBPage>(initialPage));
+          .thenAnswer((_) => SynchronousFuture<DBMaterialPage>(initialPage));
 
       when(() => mockPageBuilder.initialDestination)
           .thenReturn(initialPage.destination);
@@ -119,7 +119,7 @@ void main() {
     'should not call onInitialDestinationExited when page from the same '
     'feature are pushed and initial page is in background',
     (WidgetTester tester) async {
-      final DBPage initialPage = DBPage(
+      final DBMaterialPage initialPage = DBMaterialPage(
         key: const ValueKey<String>('/'),
         destination: const Destination(path: '/'),
         child: const Placeholder(),
@@ -131,7 +131,7 @@ void main() {
           .thenReturn(true);
 
       when(() => mockPageBuilder.buildPage(initialPage.destination))
-          .thenAnswer((_) => SynchronousFuture<DBPage>(initialPage));
+          .thenAnswer((_) => SynchronousFuture<DBMaterialPage>(initialPage));
 
       when(() => mockPageBuilder.initialDestination)
           .thenReturn(initialPage.destination);
@@ -148,7 +148,7 @@ void main() {
         ),
       );
 
-      final DBPage secondPage = DBPage(
+      final DBMaterialPage secondPage = DBMaterialPage(
         key: const ValueKey<String>('/second'),
         destination: const Destination(path: '/second'),
         child: const Placeholder(),
@@ -185,7 +185,7 @@ void main() {
     'should not call onInitialDestinationExited when dialog or page from '
     'navigator 1 are pushed and initial page is in background',
     (WidgetTester tester) async {
-      final DBPage initialPage = DBPage(
+      final DBMaterialPage initialPage = DBMaterialPage(
         key: const ValueKey<String>('/'),
         destination: const Destination(path: '/'),
         child: const Placeholder(),
@@ -197,7 +197,7 @@ void main() {
           .thenReturn(true);
 
       when(() => mockPageBuilder.buildPage(initialPage.destination))
-          .thenAnswer((_) => SynchronousFuture<DBPage>(initialPage));
+          .thenAnswer((_) => SynchronousFuture<DBMaterialPage>(initialPage));
 
       when(() => mockPageBuilder.initialDestination)
           .thenReturn(initialPage.destination);
@@ -240,7 +240,7 @@ void main() {
 class _MockScopedPageBuilder extends Mock implements ScopedPageBuilder {}
 
 class _AdditionalFeaturePageBuilder extends ScopedPageBuilder {
-  static final DBPage initialPage = DBPage(
+  static final DBMaterialPage initialPage = DBMaterialPage(
     key: const ValueKey<String>('/'),
     destination: const Destination(path: '/'),
     child: const Placeholder(),
@@ -255,8 +255,8 @@ class _AdditionalFeaturePageBuilder extends ScopedPageBuilder {
   String get scopeName => 'additional_feature';
 
   @override
-  Future<DBPage> buildPage(Destination destination) {
-    return SynchronousFuture<DBPage>(initialPage);
+  Future<DBMaterialPage> buildPage(Destination destination) {
+    return SynchronousFuture<DBMaterialPage>(initialPage);
   }
 
   @override
