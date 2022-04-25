@@ -1,17 +1,20 @@
 library db_navigator;
 
-export 'package:db_navigator/src/db_page.dart';
-export 'package:db_navigator/src/db_page_builder.dart';
-export 'package:db_navigator/src/db_route_information_parser.dart';
-export 'package:db_navigator/src/db_router_delegate.dart';
-export 'package:db_navigator/src/destination.dart';
-export 'package:db_navigator/src/destination_argument_converter.dart';
-export 'package:db_navigator/src/exceptions.dart';
-export 'package:db_navigator/src/page_transitions/enter_from_left_exit_to_left_page_transition.dart';
-export 'package:db_navigator/src/page_transitions/enter_from_right_exit_to_left_page_transition.dart';
-export 'package:db_navigator/src/page_transitions/enter_from_right_page_transition.dart';
-export 'package:db_navigator/src/page_transitions/fade_in_page_transition.dart';
-export 'package:db_navigator/src/scoped_page_builder.dart';
+export 'src/db_page.dart';
+export 'src/db_page_builder.dart';
+export 'src/db_route_information_parser.dart';
+export 'src/db_router_delegate.dart';
+export 'src/destination.dart';
+export 'src/destination_argument_converter.dart';
+export 'src/exceptions.dart';
+export 'src/page_transitions/enter_from_left_exit_to_left_page_transition.dart';
+export 'src/page_transitions/enter_from_right_exit_to_left_page_transition.dart';
+export 'src/page_transitions/enter_from_right_page_transition.dart';
+export 'src/page_transitions/fade_in_page_transition.dart';
+export 'src/scoped_page_builder.dart';
+export 'src/ui/db_nested_navigation_for_tab_view.dart';
+export 'src/ui/db_nested_navigation_indexed_stack.dart';
+export 'src/utils/db_router_delegate_extensions.dart';
 
 /// DB Navigator.
 ///
