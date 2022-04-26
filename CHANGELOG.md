@@ -70,3 +70,9 @@
 * Updated algorithm logic for scoped page builder entering and exiting events.
 * Added default db page transitions for both material and cupertino.
 * Fixed example for arguments.
+
+## 0.1.1
+
+* Added support for restoration scope id for DBRouterDelegate.
+* Added support for out of box widget that provide nested navigation functionality out of the box.
+* Added support for disposing of DBRouterDelegate.

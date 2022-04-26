@@ -222,12 +222,14 @@ void main() {
             <String, Completer<Object?>>{};
 
         final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
-            <DBPage>[],
-            <DBPageBuilder>[pageBuilder],
-            GlobalKey<NavigatorState>(),
-            trackers,
-            DBNavigationObserver(),
-            <NavigatorObserver>[]);
+          <DBPage>[],
+          <DBPageBuilder>[pageBuilder],
+          GlobalKey<NavigatorState>(),
+          trackers,
+          DBNavigationObserver(),
+          <NavigatorObserver>[],
+          null,
+        );
 
         expect(routerDelegate.pages, isEmpty);
 
@@ -247,6 +249,7 @@ void main() {
           trackers,
           DBNavigationObserver(),
           <NavigatorObserver>[],
+          null,
         );
 
         expect(routerDelegate.pages, hasLength(equals(1)));
@@ -273,6 +276,7 @@ void main() {
             trackers,
             DBNavigationObserver(),
             <NavigatorObserver>[],
+            null,
           );
 
           expect(routerDelegate.pages, hasLength(2));
@@ -372,6 +376,7 @@ void main() {
             <String, Completer<Object?>>{},
             DBNavigationObserver(),
             <NavigatorObserver>[],
+            null,
             reportPageUpdateToEngine: true,
           );
 
@@ -398,6 +403,7 @@ void main() {
             trackers,
             DBNavigationObserver(),
             <NavigatorObserver>[],
+            null,
             reportPageUpdateToEngine: true,
           );
 
@@ -515,6 +521,7 @@ void main() {
           <String, Completer<Object?>>{},
           DBNavigationObserver(),
           <NavigatorObserver>[],
+          null,
         );
 
         expect(routerDelegate.pages, isEmpty);
@@ -554,6 +561,7 @@ void main() {
             <String, Completer<Object?>>{},
             DBNavigationObserver(),
             <NavigatorObserver>[],
+            null,
           );
 
           expect(routerDelegate.pages, hasLength(2));
@@ -583,6 +591,7 @@ void main() {
             <String, Completer<Object?>>{},
             DBNavigationObserver(),
             <NavigatorObserver>[],
+            null,
           );
 
           expect(routerDelegate.pages, hasLength(equals(3)));
@@ -615,6 +624,7 @@ void main() {
             <String, Completer<Object?>>{},
             DBNavigationObserver(),
             <NavigatorObserver>[],
+            null,
           );
 
           expect(routerDelegate.pages, hasLength(equals(4)));
@@ -641,6 +651,7 @@ void main() {
         <String, Completer<Object?>>{},
         DBNavigationObserver(),
         <NavigatorObserver>[],
+        null,
       );
 
       expect(routerDelegate.pages, isEmpty);
@@ -663,6 +674,7 @@ void main() {
           <String, Completer<Object?>>{},
           DBNavigationObserver(),
           <NavigatorObserver>[],
+          null,
         );
 
         expect(routerDelegate.pages, hasLength(equals(1)));
@@ -699,6 +711,7 @@ void main() {
           <String, Completer<Object?>>{},
           DBNavigationObserver(),
           <NavigatorObserver>[],
+          null,
         );
 
         expect(routerDelegate.pages, hasLength(equals(4)));

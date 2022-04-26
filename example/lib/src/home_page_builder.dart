@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:db_navigator/db_navigator.dart';
 import 'package:example/src/args_demo_screen.dart';
 import 'package:example/src/home_screen.dart';

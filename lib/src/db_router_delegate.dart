@@ -22,6 +22,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   final Map<String, Completer<Object?>> _popResultTracker;
   final List<NavigatorObserver> _customNavigatorObservers;
   final DBNavigationObserver _navigationObserver;
+  final String? _restorationScopeId;
 
   /// Report page update to the flutter engine when the top most page changes.
   ///
@@ -71,6 +72,9 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   List<DBPageBuilder> get pageBuilders =>
       List<DBPageBuilder>.unmodifiable(_pageBuilders);
 
+  /// [DBRouterDelegate] restoration scope id.
+  String? get restorationScopeId => _restorationScopeId;
+
   /// Create a [DBRouterDelegate] with the provided [pageBuilders]
   /// and [initialPage].
   ///
@@ -94,6 +98,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     GlobalKey<NavigatorState>? navigatorKey,
     List<NavigatorObserver>? navigatorObservers,
     @visibleForTesting Map<String, Completer<Object?>>? popResultTracker,
+    String? restorationScopeId,
     bool reportPageUpdateToEngine = false,
   }) {
     assert(pageBuilders.isNotEmpty, 'Page builder list is empty');
@@ -113,6 +118,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
       popResultTracker ?? <String, Completer<Object?>>{},
       DBNavigationObserver(),
       navigatorObservers ?? <NavigatorObserver>[],
+      restorationScopeId,
       reportPageUpdateToEngine: reportPageUpdateToEngine,
     );
   }
@@ -125,7 +131,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     this._navigatorKey,
     this._popResultTracker,
     this._navigationObserver,
-    this._customNavigatorObservers, {
+    this._customNavigatorObservers,
+    this._restorationScopeId, {
     this.reportPageUpdateToEngine = false,
   });
 
@@ -212,6 +219,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
         _navigationObserver,
         ..._customNavigatorObservers,
       ],
+      restorationScopeId: _restorationScopeId,
     );
   }
 

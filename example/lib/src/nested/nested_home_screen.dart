@@ -17,32 +17,29 @@ class NestedHomeScreen extends StatefulWidget {
 class _NestedHomeScreenState extends State<NestedHomeScreen> {
   int _selectedTabIndex = 0;
 
-  late DBRouterDelegate _tab1Delegate;
-  late DBRouterDelegate _tab2Delegate;
+  late final List<DBRouterDelegate> _tabDelegates;
 
   @override
   void initState() {
     super.initState();
-    final ScreenPageBuilder pageBuilder1 = ScreenPageBuilder();
-
-    _tab1Delegate = DBRouterDelegate(
-      initialPage: ScreenPageBuilder.initialPage,
-      pageBuilders: <DBPageBuilder>[pageBuilder1],
-    );
-
-    final ScreenPageBuilder pageBuilder2 = ScreenPageBuilder();
-
-    _tab2Delegate = DBRouterDelegate(
-      initialPage: ScreenPageBuilder.initialPage,
-      pageBuilders: <DBPageBuilder>[pageBuilder2],
-    );
+    _tabDelegates = <DBRouterDelegate>[
+      DBRouterDelegate(
+        initialPage: ScreenPageBuilder.initialPage,
+        pageBuilders: <DBPageBuilder>[ScreenPageBuilder()],
+      ),
+      DBRouterDelegate(
+        initialPage: ScreenPageBuilder.initialPage,
+        pageBuilders: <DBPageBuilder>[ScreenPageBuilder()],
+      ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Router<Destination>(
-        routerDelegate: _selectedTabIndex == 0 ? _tab1Delegate : _tab2Delegate,
+      body: DBNestedNavigationIndexedStack(
+        delegates: _tabDelegates,
+        currentViewIndex: _selectedTabIndex,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedTabIndex,

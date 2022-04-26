@@ -1,7 +1,5 @@
-import 'package:collection/collection.dart';
 import 'package:db_navigator/db_navigator.dart';
 import 'package:example/src/args_demo_screen.dart';
-import 'package:example/src/nested/nested_home_screen.dart';
 import 'package:example/src/regular_demo.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
