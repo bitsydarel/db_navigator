@@ -80,4 +80,4 @@
 ## 0.1.2
 
 * Added support for sync and async type of destination factory
-* Added support for page builder scope exiting events when reset is called.
+* Added support for page builder scope exiting events when reset is called. (This provides better support for DI scopes)
