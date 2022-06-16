@@ -76,3 +76,8 @@
 * Added support for restoration scope id for DBRouterDelegate.
 * Added support for out of box widget that provide nested navigation functionality out of the box.
 * Added support for disposing of DBRouterDelegate.
+
+## 0.1.2
+
+* Added support for sync and async type of destination factory
+* Added support for page builder scope exiting events when reset is called.

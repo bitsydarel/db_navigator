@@ -14,8 +14,8 @@ class HomePageBuilder extends DBPageBuilder {
     child: const HomeScreen(),
   );
 
-  static final Map<String, DestinationPageFactory> _stack =
-      <String, DestinationPageFactory>{
+  static final Map<String, AsyncDestinationPageFactory> _stack =
+      <String, AsyncDestinationPageFactory>{
     HomeScreen.path: (Destination destination) {
       return SynchronousFuture<DBMaterialPage>(initialPage);
     },
@@ -54,7 +54,7 @@ class HomePageBuilder extends DBPageBuilder {
   Future<DBPage> buildPage(Destination destination) {
     debugPrintThrottled(destination.path);
 
-    final DestinationPageFactory? pageFactory = _stack[destination.path] ??
+    final AsyncDestinationPageFactory? pageFactory = _stack[destination.path] ??
         (destination.path.startsWith(ArgsDemoScreen.path)
             ? _stack[ArgsDemoScreen.path]
             : null);
