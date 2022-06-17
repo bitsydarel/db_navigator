@@ -2,11 +2,17 @@ import 'package:db_navigator/src/db_page.dart';
 import 'package:db_navigator/src/destination.dart';
 import 'package:flutter/widgets.dart';
 
+/// Async function allowing to create [Widget] for the provided [Destination].
+typedef AsyncDestinationWidgetFactory = Future<Widget> Function(Destination);
+
+/// Async function allowing to create [DBPage] for the provided [Destination].
+typedef AsyncDestinationPageFactory = Future<DBPage> Function(Destination);
+
 /// Function allowing to create [Widget] for the provided [Destination].
-typedef DestinationWidgetFactory = Future<Widget> Function(Destination);
+typedef DestinationWidgetFactory = Widget Function(Destination);
 
 /// Function allowing to create [DBPage] for the provided [Destination].
-typedef DestinationPageFactory = Future<DBPage> Function(Destination);
+typedef DestinationPageFactory = DBPage Function(Destination);
 
 /// DB Page Builder build a [DBPage] from a [Destination].
 abstract class DBPageBuilder {

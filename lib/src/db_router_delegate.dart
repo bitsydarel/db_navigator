@@ -233,6 +233,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   }) async {
     assert(newPageBuilders.isNotEmpty, "List of page builders can't be empty");
 
+    _navigationObserver.reset();
+
     _pageBuilders
       ..clear()
       ..addAll(newPageBuilders);
