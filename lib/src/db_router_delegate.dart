@@ -254,9 +254,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     }
 
     if (initialPageHistory != null && initialPageHistory.isNotEmpty) {
-      final List<DBPage> prevPages = await _pageBuilders.createPages(
-        initialPageHistory,
-      );
+      final List<DBPage> prevPages =
+          await _pageBuilders.createPages(initialPageHistory);
 
       _pages
         ..clear()
@@ -281,8 +280,15 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   Future<T?> navigateTo<T extends Object?>({
     required final String location,
     final Object? arguments,
+    final List<Destination>? history,
   }) async {
     assert(location.trim().isNotEmpty, 'destination location is empty');
+
+    if (history != null && history.isNotEmpty) {
+      final List<DBPage> newPages = await _pageBuilders.buildStack(history);
+
+      _pages.addAll(newPages);
+    }
 
     final Destination destination = Destination(
       path: location,
@@ -304,6 +310,14 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     _popResultTracker[destination.path] = popTracker;
 
     notifyListeners();
+
+    if (history != null && history.isNotEmpty) {
+      final Completer<T?> topPagePopTracker = Completer<T?>();
+      _popResultTracker[history.first.path] = topPagePopTracker;
+
+      final T? result = await topPagePopTracker.future;
+      return result;
+    }
 
     final T? result = await popTracker.future;
 
@@ -518,9 +532,7 @@ extension ListOfPageBuilderExtension on Iterable<DBPageBuilder> {
 
   /// Builds navigation stack of pages from list of [Destination]
   @visibleForTesting
-  Future<List<DBPage>> buildStack(
-    final List<Destination> destinations,
-  ) async {
+  Future<List<DBPage>> buildStack(final List<Destination> destinations) async {
     final List<DBPage> stack = <DBPage>[];
 
     for (final Destination destination in destinations) {

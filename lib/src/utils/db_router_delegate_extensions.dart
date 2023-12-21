@@ -20,9 +20,13 @@ extension DBRouterDelegateBuildContextExtensions on BuildContext {
   Future<T?> navigateTo<T>({
     required String location,
     Object? arguments,
+    List<Destination>? history,
     bool useRootDelegate = false,
   }) {
-    return DBRouterDelegate.of(this, root: useRootDelegate)
-        .navigateTo<T>(location: location, arguments: arguments);
+    return DBRouterDelegate.of(this, root: useRootDelegate).navigateTo<T>(
+      location: location,
+      arguments: arguments,
+      history: history,
+    );
   }
 }

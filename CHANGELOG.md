@@ -81,3 +81,15 @@
 
 * Added support for sync and async type of destination factory
 * Added support for page builder scope exiting events when reset is called. (This provides better support for DI scopes)
+
+## 0.1.3
+
+* Added support for history when navigating to pages.
+
+## 0.1.4
+
+* Added history for the navigateTo extension.
+
+## 0.1.5
+
+* If navigateTo called with history then the result returned should be from the top history. 

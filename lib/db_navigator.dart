@@ -1,5 +1,7 @@
 library db_navigator;
 
+import 'package:db_navigator/src/destination.dart';
+
 export 'src/db_page.dart';
 export 'src/db_page_builder.dart';
 export 'src/db_route_information_parser.dart';
@@ -28,6 +30,7 @@ abstract class DBNavigator {
   Future<T?> navigateTo<T extends Object?>({
     required final String location,
     final Object? arguments,
+    final List<Destination>? history,
   });
 
   /// Can close the current location.
